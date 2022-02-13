@@ -2,10 +2,10 @@
 
 namespace Humweb\InertiaTable;
 
+use Humweb\InertiaTable\Commands\InertiaTableCommand;
 use Inertia\Response;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Humweb\InertiaTable\Commands\InertiaTableCommand;
 
 class InertiaTableServiceProvider extends PackageServiceProvider
 {

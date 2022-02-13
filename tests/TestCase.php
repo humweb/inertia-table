@@ -2,9 +2,9 @@
 
 namespace Humweb\InertiaTable\Tests;
 
+use Humweb\InertiaTable\InertiaTableServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Humweb\InertiaTable\InertiaTableServiceProvider;
 
 class TestCase extends Orchestra
 {
