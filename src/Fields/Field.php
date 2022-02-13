@@ -2,12 +2,10 @@
 
 namespace Humweb\InertiaTable\Fields;
 
-
 use Humweb\InertiaTable\Support\Makeable;
 
 class Field
 {
-
     use Makeable;
 
     /**
@@ -67,7 +65,6 @@ class Field
 
     public bool $hideable = true;
 
-
     /**
      * @param  string       $name
      * @param  string|null  $attribute
@@ -75,20 +72,23 @@ class Field
      */
     public function __construct(string $name, string $attribute = null, string $description = '')
     {
-        $this->name        = $name;
-        $this->attribute   = $attribute ?: strtolower($name);
+        $this->name = $name;
+        $this->attribute = $attribute ?: strtolower($name);
         $this->description = $description;
     }
 
-    public function sortable() {
+    public function sortable()
+    {
         $this->sortable = true;
     }
 
-    public function hideable() {
+    public function hideable()
+    {
         $this->hideable = true;
     }
 
-    public function filter($filter) {
+    public function filter($filter)
+    {
         $this->filter = $filter;
     }
 
@@ -102,8 +102,8 @@ class Field
     {
         if (property_exists($this, $method)) {
             $this->$method = $parameters[0];
+
             return $this;
         }
     }
-
 }
