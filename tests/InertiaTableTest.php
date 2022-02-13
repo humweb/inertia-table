@@ -1,10 +1,12 @@
 <?php
 
 namespace Humweb\Tests;
+
+use Humweb\InertiaTable\InertiaTable;
 use Illuminate\Http\Request;
 use Illuminate\Testing\Assert;
-use Humweb\InertiaTable\InertiaTable;
 use Orchestra\Testbench\TestCase;
+
 class InertiaTableTest extends TestCase
 {
     private function request(callable $callback = null): Request
@@ -37,8 +39,8 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "columns" => [
                 "name" => [
-                    "key"     => "name",
-                    "label"   => "Name",
+                    "key" => "name",
+                    "label" => "Name",
                     "enabled" => true,
                 ],
             ],
@@ -56,8 +58,8 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "columns" => [
                 "name" => [
-                    "key"     => "name",
-                    "label"   => "Name",
+                    "key" => "name",
+                    "label" => "Name",
                     "enabled" => false,
                 ],
             ],
@@ -72,8 +74,8 @@ class InertiaTableTest extends TestCase
         }));
 
         $table->addColumns([
-            'name'    => 'Name',
-            'email'   => 'Email',
+            'name' => 'Name',
+            'email' => 'Email',
             'country' => 'Country',
         ]);
 
@@ -95,7 +97,7 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "search" => [
                 "name" => [
-                    "key"   => "name",
+                    "key" => "name",
                     "label" => "Name",
                     "value" => null,
                 ],
@@ -108,14 +110,14 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('filter', [
-                'name'  => 'pascal',
+                'name' => 'pascal',
                 'email' => '@protone.media',
             ]);
         }));
 
         $table->addSearchRows([
-            'name'    => 'Name',
-            'email'   => 'Email',
+            'name' => 'Name',
+            'email' => 'Email',
             'country' => 'Country',
         ]);
 
@@ -131,8 +133,8 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('filter', [
-                'name'    => 'a',
-                'email'   => 'b',
+                'name' => 'a',
+                'email' => 'b',
                 'country' => 'c',
             ]);
         }));
@@ -162,9 +164,9 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "filters" => [
                 "name" => [
-                    "key"     => "name",
-                    "label"   => "Name",
-                    "value"   => null,
+                    "key" => "name",
+                    "label" => "Name",
+                    "value" => null,
                     "options" => [
                         'a' => 'Option A',
                         'b' => 'Option B',
