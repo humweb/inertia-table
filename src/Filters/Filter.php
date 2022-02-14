@@ -39,14 +39,13 @@ class Filter
      * @param  array              $options
      * @param  string|array|null  $value
      */
-    public function __construct(string $key, string $label, array $options, string|array $value =  null)
+    public function __construct(string $key, string $label, array $options, string|array $value = null)
     {
-        $this->key     = $key;
+        $this->key = $key;
         $this->options = $options;
-        $this->label   = $label;
-        $this->value   = $value;
+        $this->label = $label;
+        $this->value = $value;
     }
-
 
     /**
      * @param $method
@@ -66,11 +65,10 @@ class Filter
     public function toArray()
     {
         return [
-            'key'     => $this->key,
+            'key' => $this->key,
             'options' => $this->options,
-            'label'   => $this->label,
-            'value'   => $this->value
+            'label' => $this->label,
+            'value' => $this->value,
         ];
     }
-
 }
