@@ -21,7 +21,7 @@ class InertiaTable
         $this->request = $request;
 
         $this->columns = collect();
-        $this->search  = collect();
+        $this->search = collect();
         $this->filters = collect();
     }
 
@@ -46,14 +46,14 @@ class InertiaTable
     public function getQueryBuilderProps(): array
     {
         $columns = $this->transformColumns();
-        $search  = $this->transformSearch();
+        $search = $this->transformSearch();
         $filters = $this->transformFilters();
 
         return [
-            'sort'    => $this->request->query('sort'),
-            'page'    => Paginator::resolveCurrentPage(),
+            'sort' => $this->request->query('sort'),
+            'page' => Paginator::resolveCurrentPage(),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
@@ -72,7 +72,7 @@ class InertiaTable
         }
 
         return $this->columns->map(function ($column, $key) use ($columns) {
-            if (!in_array($key, $columns)) {
+            if (! in_array($key, $columns)) {
                 $column['enabled'] = false;
             }
 
@@ -91,7 +91,7 @@ class InertiaTable
 
         if ($this->globalSearch) {
             $search->prepend([
-                'key'   => 'global',
+                'key' => 'global',
                 'label' => 'global',
                 'value' => null,
             ], 'global');
@@ -104,11 +104,11 @@ class InertiaTable
         }
 
         return $search->map(function ($search, $key) use ($filters) {
-            if (!array_key_exists($key, $filters)) {
+            if (! array_key_exists($key, $filters)) {
                 return $search;
             }
 
-            $search['value']   = $filters[$key];
+            $search['value'] = $filters[$key];
             $search['enabled'] = true;
 
             return $search;
@@ -129,13 +129,13 @@ class InertiaTable
         }
 
         return $this->filters->map(function ($filter) use ($filters) {
-            if (!array_key_exists($filter->key, $filters)) {
+            if (! array_key_exists($filter->key, $filters)) {
                 return $filter->toArray();
             }
 
             $filter->value = $filters[$filter->key];
 
-            if (!array_key_exists($filter->value, $filter->options ?? [])) {
+            if (! array_key_exists($filter->value, $filter->options ?? [])) {
                 return $filter->toArray();
             }
 
@@ -169,8 +169,8 @@ class InertiaTable
     public function column(array|string $key, string $label, bool $enabled = true): self
     {
         $this->columns->put($key, [
-            'key'     => $key,
-            'label'   => $label,
+            'key' => $key,
+            'label' => $label,
             'enabled' => $enabled,
         ]);
 
@@ -212,7 +212,7 @@ class InertiaTable
             }
         } else {
             $this->search->put($columns, [
-                'key'   => $columns,
+                'key' => $columns,
                 'label' => $label,
                 'value' => null,
             ]);
@@ -220,7 +220,6 @@ class InertiaTable
 
         return $this;
     }
-
 
     /**
      * Add a filter to the query builder.

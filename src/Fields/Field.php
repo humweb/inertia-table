@@ -59,7 +59,6 @@ class Field
      */
     public $filter;
 
-
     /**
      * @param  string       $name
      * @param  string|null  $attribute
