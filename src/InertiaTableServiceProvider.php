@@ -33,7 +33,7 @@ class InertiaTableServiceProvider extends PackageServiceProvider
                 $withTableBuilder($tableBuilder);
             }
 
-            return $tableBuilder->applyTo($this);
+            return $tableBuilder->shareProps($this);
         });
     }
 }

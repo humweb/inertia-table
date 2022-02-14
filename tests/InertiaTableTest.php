@@ -32,7 +32,7 @@ class InertiaTableTest extends TestCase
     public function it_can_add_a_column_to_toggle()
     {
         $table = new InertiaTable($this->request());
-        $table->addColumn('name', 'Name');
+        $table->column('name', 'Name');
 
         $props = $table->getQueryBuilderProps();
 
@@ -51,7 +51,7 @@ class InertiaTableTest extends TestCase
     public function it_can_add_a_column_that_is_disabled_by_default()
     {
         $table = new InertiaTable($this->request());
-        $table->addColumn('name', 'Name', false);
+        $table->column('name', 'Name', false);
 
         $props = $table->getQueryBuilderProps();
 
@@ -73,7 +73,7 @@ class InertiaTableTest extends TestCase
             $request->query->set('columns', ['name', 'country']);
         }));
 
-        $table->addColumns([
+        $table->columns([
             'name' => 'Name',
             'email' => 'Email',
             'country' => 'Country',
@@ -90,7 +90,7 @@ class InertiaTableTest extends TestCase
     public function it_can_add_a_search_row()
     {
         $table = new InertiaTable($this->request());
-        $table->addSearch('name', 'Name');
+        $table->searchable('name', 'Name');
 
         $props = $table->getQueryBuilderProps();
 
@@ -139,9 +139,9 @@ class InertiaTableTest extends TestCase
             ]);
         }));
 
-        $table->addFilter('name', 'Name', ['a' => 'Option A'])
-            ->addFilter('email', 'Email', ['a' => 'Option A', 'b' => 'Option B'])
-            ->addFilter('country', 'Country', []);
+        $table->filter('name', 'Name', ['a' => 'Option A'])
+            ->filter('email', 'Email', ['a' => 'Option A', 'b' => 'Option B'])
+            ->filter('country', 'Country', []);
 
         $props = $table->getQueryBuilderProps();
 
@@ -154,7 +154,7 @@ class InertiaTableTest extends TestCase
     public function it_can_add_a_filter_with_options()
     {
         $table = new InertiaTable($this->request());
-        $table->addFilter('name', 'Name', $options = [
+        $table->filter('name', 'Name', $options = [
             'a' => 'Option A',
             'b' => 'Option B',
         ]);

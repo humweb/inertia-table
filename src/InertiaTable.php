@@ -19,9 +19,9 @@ class InertiaTable
     {
         $this->request = $request;
 
-        $this->columns = new Collection();
-        $this->search = new Collection();
-        $this->filters = new Collection();
+        $this->columns = collect();
+        $this->search  = collect();
+        $this->filters = collect();
     }
 
     /**
@@ -45,20 +45,20 @@ class InertiaTable
     public function getQueryBuilderProps(): array
     {
         $columns = $this->transformColumns();
-        $search = $this->transformSearch();
+        $search  = $this->transformSearch();
         $filters = $this->transformFilters();
 
         return [
-            'sort' => $this->request->query('sort'),
-            'page' => Paginator::resolveCurrentPage(),
+            'sort'    => $this->request->query('sort'),
+            'page'    => Paginator::resolveCurrentPage(),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
 
     /**
-     * Transform the columns collection so it can be used in the Inertia front-end.
+     * Transform the column collection for frontend.
      *
      * @return \Illuminate\Support\Collection
      */
@@ -71,7 +71,7 @@ class InertiaTable
         }
 
         return $this->columns->map(function ($column, $key) use ($columns) {
-            if (! in_array($key, $columns)) {
+            if (!in_array($key, $columns)) {
                 $column['enabled'] = false;
             }
 
@@ -80,7 +80,7 @@ class InertiaTable
     }
 
     /**
-     * Transform the search collection so it can be used in the Inertia front-end.
+     * Transform the search collection for the frontend
      *
      * @return \Illuminate\Support\Collection
      */
@@ -90,7 +90,7 @@ class InertiaTable
 
         if ($this->globalSearch) {
             $search->prepend([
-                'key' => 'global',
+                'key'   => 'global',
                 'label' => 'global',
                 'value' => null,
             ], 'global');
@@ -103,11 +103,11 @@ class InertiaTable
         }
 
         return $search->map(function ($search, $key) use ($filters) {
-            if (! array_key_exists($key, $filters)) {
+            if (!array_key_exists($key, $filters)) {
                 return $search;
             }
 
-            $search['value'] = $filters[$key];
+            $search['value']   = $filters[$key];
             $search['enabled'] = true;
 
             return $search;
@@ -115,7 +115,7 @@ class InertiaTable
     }
 
     /**
-     * Transform the filters collection so it can be used in the Inertia front-end.
+     * Transform the filters collection for frontend
      *
      * @return \Illuminate\Support\Collection
      */
@@ -128,13 +128,13 @@ class InertiaTable
         }
 
         return $this->filters->map(function ($filter, $key) use ($filters) {
-            if (! array_key_exists($key, $filters)) {
+            if (!array_key_exists($key, $filters)) {
                 return $filter;
             }
 
             $value = $filters[$key];
 
-            if (! array_key_exists($value, $filter['options'] ?? [])) {
+            if (!array_key_exists($value, $filter['options'] ?? [])) {
                 return $filter;
             }
 
@@ -145,13 +145,13 @@ class InertiaTable
     }
 
     /**
-     * Give the query builder props to the given Inertia response.
+     * Share query builder props with Inertia response.
      *
      * @param  \Inertia\Response  $response
      *
      * @return \Inertia\Response
      */
-    public function applyTo(Response $response): Response
+    public function shareProps(Response $response): Response
     {
         return $response->with('queryBuilderProps', $this->getQueryBuilderProps());
     }
@@ -159,69 +159,74 @@ class InertiaTable
     /**
      * Add a column to the query builder.
      *
-     * @param  string  $key
-     * @param  string  $label
-     * @param  bool    $enabled
+     * @param  string|array  $key
+     * @param  string        $label
+     * @param  bool          $enabled
      *
      * @return self
      */
-    public function addColumn(string $key, string $label, bool $enabled = true): InertiaTable
+    public function column(array|string $key, string $label, bool $enabled = true): self
     {
         $this->columns->put($key, [
-            'key' => $key,
-            'label' => $label,
+            'key'     => $key,
+            'label'   => $label,
             'enabled' => $enabled,
         ]);
 
         return $this;
     }
 
-    public function addColumns(array $columns = []): InertiaTable
+    public function columns(array $columns = []): InertiaTable
     {
         foreach ($columns as $key => $value) {
             if (is_array($value)) {
-                $this->addColumn($key, $value['value'], $value['enabled'] ?? true);
+                $this->column($key, $value['value'], $value['enabled'] ?? true);
             } else {
-                $this->addColumn($key, $value, true);
+                $this->column($key, $value, true);
             }
         }
 
         return $this;
     }
 
-    public function addColumnAndSearch(string $key, string $label, bool $enabled = true): InertiaTable
+    public function columnAndSearchable(string $key, string $label, bool $enabled = true): InertiaTable
     {
-        return $this->addColumn($key, $label, $enabled)
-            ->addSearch($key, $label);
+        return $this->column($key, $label, $enabled)
+            ->searchable($key, $label);
     }
 
     /**
      * Add a search row to the query builder.
      *
-     * @param  string  $key
-     * @param  string  $label
+     * @param  string|array  $key
+     * @param  string|null   $label
      *
      * @return self
      */
-    public function addSearch(string $key, string $label): InertiaTable
+    public function searchable(string|array $key, string $label = null): InertiaTable
     {
-        $this->search->put($key, [
-            'key' => $key,
-            'label' => $label,
-            'value' => null,
-        ]);
-
-        return $this;
-    }
-
-    public function addSearchRows(array $columns = []): InertiaTable
-    {
-        foreach ($columns as $key => $label) {
-            $this->addSearch($key, $label);
+        if (!is_array($key)) {
+            $key = [
+                [
+                    'key'   => $key,
+                    'label' => $label,
+                    'value' => null,
+                ]
+            ];
         }
 
+        foreach ($key as $id => $label) {
+            $this->search->put($id, [
+                'key'   => $id,
+                'label' => $label,
+                'value' => null,
+            ]);
+        }
+
+
         return $this;
     }
+
 
     /**
      * Add a filter to the query builder.
@@ -233,13 +238,13 @@ class InertiaTable
      *
      * @return InertiaTable
      */
-    public function addFilter(string $key, string $label, array $options, $default = null): InertiaTable
+    public function filter(string $key, string $label, array $options, $default = null): InertiaTable
     {
         $this->filters->put($key, [
-            'key' => $key,
-            'label' => $label,
+            'key'     => $key,
+            'label'   => $label,
             'options' => $options, '-', '',
-            'value' => $default,
+            'value'   => $default,
         ]);
 
         return $this;
