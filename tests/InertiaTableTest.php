@@ -2,6 +2,7 @@
 
 namespace Humweb\Tests;
 
+use Humweb\InertiaTable\Filters\Select;
 use Humweb\InertiaTable\InertiaTable;
 use Illuminate\Http\Request;
 use Illuminate\Testing\Assert;
@@ -39,8 +40,8 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "columns" => [
                 "name" => [
-                    "key" => "name",
-                    "label" => "Name",
+                    "key"     => "name",
+                    "label"   => "Name",
                     "enabled" => true,
                 ],
             ],
@@ -58,8 +59,8 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "columns" => [
                 "name" => [
-                    "key" => "name",
-                    "label" => "Name",
+                    "key"     => "name",
+                    "label"   => "Name",
                     "enabled" => false,
                 ],
             ],
@@ -74,8 +75,8 @@ class InertiaTableTest extends TestCase
         }));
 
         $table->columns([
-            'name' => 'Name',
-            'email' => 'Email',
+            'name'    => 'Name',
+            'email'   => 'Email',
             'country' => 'Country',
         ]);
 
@@ -97,7 +98,7 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "search" => [
                 "name" => [
-                    "key" => "name",
+                    "key"   => "name",
                     "label" => "Name",
                     "value" => null,
                 ],
@@ -110,14 +111,14 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('filter', [
-                'name' => 'pascal',
+                'name'  => 'pascal',
                 'email' => '@protone.media',
             ]);
         }));
 
-        $table->addSearchRows([
-            'name' => 'Name',
-            'email' => 'Email',
+        $table->searchable([
+            'name'    => 'Name',
+            'email'   => 'Email',
             'country' => 'Country',
         ]);
 
@@ -133,45 +134,40 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('filter', [
-                'name' => 'a',
-                'email' => 'b',
-                'country' => 'c',
+                'name'    => 'a',
+                'email'   => 'b',
+                'country' => 'c'
             ]);
         }));
 
-        $table->filter('name', 'Name', ['a' => 'Option A'])
-            ->filter('email', 'Email', ['a' => 'Option A', 'b' => 'Option B'])
-            ->filter('country', 'Country', []);
+        $table->filter(Select::make('name', 'Name', ['a' => 'Option A']))
+            ->filter(Select::make('email', 'Email', ['a' => 'Option A', 'b' => 'Option B']))
+            ->filter(Select::make('country', 'Country', ['c' => 'USA']));
 
         $props = $table->getQueryBuilderProps();
 
         $this->assertEquals('a', $props['filters']['name']['value']);
         $this->assertEquals('b', $props['filters']['email']['value']);
-        $this->assertNull($props['filters']['country']['value']);
+        $this->assertEquals('c', $props['filters']['country']['value']);
     }
 
     /** @test */
     public function it_can_add_a_filter_with_options()
     {
         $table = new InertiaTable($this->request());
-        $table->filter('name', 'Name', $options = [
+        $table->filter(Select::make('name', 'Name', [
             'a' => 'Option A',
             'b' => 'Option B',
-        ]);
+        ]));
 
         $props = $table->getQueryBuilderProps();
 
         Assert::assertArraySubset([
             "filters" => [
-                "name" => [
-                    "key" => "name",
-                    "label" => "Name",
-                    "value" => null,
-                    "options" => [
-                        'a' => 'Option A',
-                        'b' => 'Option B',
-                    ],
-                ],
+                "name" => Select::make('name', 'Name', [
+                    'a' => 'Option A',
+                    'b' => 'Option B',
+                ]),
             ],
         ], $props);
     }
