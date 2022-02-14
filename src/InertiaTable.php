@@ -20,7 +20,7 @@ class InertiaTable
         $this->request = $request;
 
         $this->columns = collect();
-        $this->search  = collect();
+        $this->search = collect();
         $this->filters = collect();
     }
 
@@ -45,14 +45,14 @@ class InertiaTable
     public function getQueryBuilderProps(): array
     {
         $columns = $this->transformColumns();
-        $search  = $this->transformSearch();
+        $search = $this->transformSearch();
         $filters = $this->transformFilters();
 
         return [
-            'sort'    => $this->request->query('sort'),
-            'page'    => Paginator::resolveCurrentPage(),
+            'sort' => $this->request->query('sort'),
+            'page' => Paginator::resolveCurrentPage(),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
@@ -71,7 +71,7 @@ class InertiaTable
         }
 
         return $this->columns->map(function ($column, $key) use ($columns) {
-            if (!in_array($key, $columns)) {
+            if (! in_array($key, $columns)) {
                 $column['enabled'] = false;
             }
 
@@ -90,7 +90,7 @@ class InertiaTable
 
         if ($this->globalSearch) {
             $search->prepend([
-                'key'   => 'global',
+                'key' => 'global',
                 'label' => 'global',
                 'value' => null,
             ], 'global');
@@ -103,11 +103,11 @@ class InertiaTable
         }
 
         return $search->map(function ($search, $key) use ($filters) {
-            if (!array_key_exists($key, $filters)) {
+            if (! array_key_exists($key, $filters)) {
                 return $search;
             }
 
-            $search['value']   = $filters[$key];
+            $search['value'] = $filters[$key];
             $search['enabled'] = true;
 
             return $search;
@@ -128,13 +128,13 @@ class InertiaTable
         }
 
         return $this->filters->map(function ($filter, $key) use ($filters) {
-            if (!array_key_exists($key, $filters)) {
+            if (! array_key_exists($key, $filters)) {
                 return $filter;
             }
 
             $value = $filters[$key];
 
-            if (!array_key_exists($value, $filter['options'] ?? [])) {
+            if (! array_key_exists($value, $filter['options'] ?? [])) {
                 return $filter;
             }
 
@@ -168,8 +168,8 @@ class InertiaTable
     public function column(array|string $key, string $label, bool $enabled = true): self
     {
         $this->columns->put($key, [
-            'key'     => $key,
-            'label'   => $label,
+            'key' => $key,
+            'label' => $label,
             'enabled' => $enabled,
         ]);
 
@@ -205,19 +205,19 @@ class InertiaTable
      */
     public function searchable(string|array $key, string $label = null): InertiaTable
     {
-        if (!is_array($key)) {
+        if (! is_array($key)) {
             $key = [
                 [
-                    'key'   => $key,
+                    'key' => $key,
                     'label' => $label,
                     'value' => null,
-                ]
+                ],
             ];
         }
 
         foreach ($key as $id => $label) {
             $this->search->put($id, [
-                'key'   => $id,
+                'key' => $id,
                 'label' => $label,
                 'value' => null,
             ]);
@@ -226,7 +226,6 @@ class InertiaTable
 
         return $this;
     }
-
 
     /**
      * Add a filter to the query builder.
@@ -241,10 +240,10 @@ class InertiaTable
     public function filter(string $key, string $label, array $options, $default = null): InertiaTable
     {
         $this->filters->put($key, [
-            'key'     => $key,
-            'label'   => $label,
+            'key' => $key,
+            'label' => $label,
             'options' => $options, '-', '',
-            'value'   => $default,
+            'value' => $default,
         ]);
 
         return $this;
