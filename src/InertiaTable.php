@@ -2,6 +2,7 @@
 
 namespace Humweb\InertiaTable;
 
+use Humweb\InertiaTable\Filters\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -127,20 +128,20 @@ class InertiaTable
             return $this->filters;
         }
 
-        return $this->filters->map(function ($filter, $key) use ($filters) {
-            if (!array_key_exists($key, $filters)) {
-                return $filter;
+        return $this->filters->map(function ($filter) use ($filters) {
+            if (!array_key_exists($filter->key, $filters)) {
+                return $filter->toArray();
             }
 
-            $value = $filters[$key];
+            $filter->value = $filters[$filter->key];
 
-            if (!array_key_exists($value, $filter['options'] ?? [])) {
-                return $filter;
+            if (!array_key_exists($filter->value, $filter->options ?? [])) {
+                return $filter->toArray();
             }
 
-            $filter['value'] = $value;
+//            $filter->value = $value;
 
-            return $filter;
+            return $filter->toArray();
         });
     }
 
@@ -198,31 +199,24 @@ class InertiaTable
     /**
      * Add a search row to the query builder.
      *
-     * @param  string|array  $key
+     * @param  string|array  $columns
      * @param  string|null   $label
      *
      * @return self
      */
-    public function searchable(string|array $key, string $label = null): InertiaTable
+    public function searchable(string|array $columns, string $label = null): InertiaTable
     {
-        if (!is_array($key)) {
-            $key = [
-                [
-                    'key'   => $key,
-                    'label' => $label,
-                    'value' => null,
-                ]
-            ];
-        }
-
-        foreach ($key as $id => $label) {
-            $this->search->put($id, [
-                'key'   => $id,
+        if (is_array($columns)) {
+            foreach ($columns as $id => $label) {
+                $this->searchable($id, $label);
+            }
+        } else {
+            $this->search->put($columns, [
+                'key'   => $columns,
                 'label' => $label,
                 'value' => null,
             ]);
         }
-
 
         return $this;
     }
@@ -231,21 +225,13 @@ class InertiaTable
     /**
      * Add a filter to the query builder.
      *
-     * @param  string  $key
-     * @param  string  $label
-     * @param  array   $options
-     * @param  null    $default
+     * @param  Filter  $filter
      *
      * @return InertiaTable
      */
-    public function filter(string $key, string $label, array $options, $default = null): InertiaTable
+    public function filter(Filter $filter): InertiaTable
     {
-        $this->filters->put($key, [
-            'key'     => $key,
-            'label'   => $label,
-            'options' => $options, '-', '',
-            'value'   => $default,
-        ]);
+        $this->filters->put($filter->key, $filter);
 
         return $this;
     }

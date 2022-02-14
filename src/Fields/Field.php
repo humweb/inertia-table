@@ -33,63 +33,81 @@ class Field
      *
      * @var string
      */
-    public string $description;
+    public string $value;
 
-    /**
-     * Filter for query
-     *
-     * @var bool
-     */
-    public $filter;
+    public bool $searchable = false;
 
     /**
      * Allow field to be sorted
      *
      * @var bool
      */
-    public bool $sortable;
+    public bool $sortable = false;
+
 
     /**
-     * Decorate the value with a callback function
+     * @var bool
+     */
+    public bool $hideable = true;
+    public bool $enabled = true;
+
+
+    /**
+     * Filter for query
      *
      * @var callable
      */
-    public $displayCallback;
+    public $filter;
 
-    /**
-     * Help text for forms and tooltips
-     *
-     * @var string
-     */
-    public string $helpText;
-
-    public bool $hideable = true;
 
     /**
      * @param  string       $name
      * @param  string|null  $attribute
-     * @param  string       $description
+     * @param  string       $value
      */
-    public function __construct(string $name, string $attribute = null, string $description = '')
+    public function __construct(string $name, string $attribute = null, string $value = '')
     {
         $this->name = $name;
         $this->attribute = $attribute ?: strtolower($name);
-        $this->description = $description;
+        $this->value = $value;
+    }
+
+    /**
+     * @return $this
+     */
+    public function searchable()
+    {
+        $this->searchable = true;
+
+        return $this;
     }
 
     public function sortable()
     {
         $this->sortable = true;
+
+        return $this;
     }
 
     public function hideable()
     {
         $this->hideable = true;
+
+        return $this;
+    }
+
+    public function notHideable()
+    {
+        $this->hideable = false;
+
+        return $this;
     }
 
     public function filter($filter)
     {
         $this->filter = $filter;
+
+        return $this;
     }
 
     /**
