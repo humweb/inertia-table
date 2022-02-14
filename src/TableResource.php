@@ -3,7 +3,6 @@
 namespace Humweb\InertiaTable;
 
 use Humweb\InertiaTable\Support\Makeable;
-use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 abstract class TableResource
@@ -24,7 +23,6 @@ abstract class TableResource
 
         $this->parameters = $parameters;
     }
-
 
     /**
      * Add filter for allowed filters
@@ -61,6 +59,7 @@ abstract class TableResource
             ->applyGlobalFilter()
             ->applyCustomFilters()
             ->applyFilters();
+
         return $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
     }
 
@@ -91,6 +90,7 @@ abstract class TableResource
     public function newQuery(): TableResource
     {
         $this->query = QueryBuilder::for($this->model);
+
         return $this;
     }
 
@@ -121,7 +121,6 @@ abstract class TableResource
 
         return $this;
     }
-
 
     /**
      * Apply default sort to builder
