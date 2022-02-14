@@ -40,8 +40,8 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "columns" => [
                 "name" => [
-                    "key"     => "name",
-                    "label"   => "Name",
+                    "key" => "name",
+                    "label" => "Name",
                     "enabled" => true,
                 ],
             ],
@@ -59,8 +59,8 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "columns" => [
                 "name" => [
-                    "key"     => "name",
-                    "label"   => "Name",
+                    "key" => "name",
+                    "label" => "Name",
                     "enabled" => false,
                 ],
             ],
@@ -75,8 +75,8 @@ class InertiaTableTest extends TestCase
         }));
 
         $table->columns([
-            'name'    => 'Name',
-            'email'   => 'Email',
+            'name' => 'Name',
+            'email' => 'Email',
             'country' => 'Country',
         ]);
 
@@ -98,7 +98,7 @@ class InertiaTableTest extends TestCase
         Assert::assertArraySubset([
             "search" => [
                 "name" => [
-                    "key"   => "name",
+                    "key" => "name",
                     "label" => "Name",
                     "value" => null,
                 ],
@@ -111,14 +111,14 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('filter', [
-                'name'  => 'pascal',
+                'name' => 'pascal',
                 'email' => '@protone.media',
             ]);
         }));
 
         $table->searchable([
-            'name'    => 'Name',
-            'email'   => 'Email',
+            'name' => 'Name',
+            'email' => 'Email',
             'country' => 'Country',
         ]);
 
@@ -134,9 +134,9 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('filter', [
-                'name'    => 'a',
-                'email'   => 'b',
-                'country' => 'c'
+                'name' => 'a',
+                'email' => 'b',
+                'country' => 'c',
             ]);
         }));
 
