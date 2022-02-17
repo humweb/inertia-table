@@ -169,12 +169,13 @@ class InertiaTable
      *
      * @return self
      */
-    public function column(array|string $key, string $label, bool $enabled = true): self
+    public function column(array|string $key, string $label, bool $sortable = false, bool $enabled = true): self
     {
         $this->columns->put($key, [
-            'key'     => $key,
-            'label'   => $label,
-            'enabled' => $enabled,
+            'key'      => $key,
+            'label'    => $label,
+            'enabled'  => $enabled,
+            'sortable' => $sortable,
         ]);
 
         return $this;
@@ -184,18 +185,18 @@ class InertiaTable
     {
         foreach ($columns as $key => $value) {
             if (is_array($value)) {
-                $this->column($key, $value['value'], $value['enabled'] ?? true);
+                $this->column($key, $value['label'], $value['sortable'] ?? true, $value['enabled'] ?? true);
             } else {
-                $this->column($key, $value, true);
+                $this->column($key, $value, true, true);
             }
         }
 
         return $this;
     }
 
-    public function columnAndSearchable(string $key, string $label, bool $enabled = true): InertiaTable
+    public function columnAndSearchable(string $key, string $label, bool $sortable = true): InertiaTable
     {
-        return $this->column($key, $label, $enabled)
+        return $this->column($key, $label, true, $sortable)
             ->searchable($key, $label);
     }
 
@@ -207,7 +208,7 @@ class InertiaTable
      *
      * @return self
      */
-    public function searchable(string|array $columns, string $label = null): InertiaTable
+    public function searchable(string|array $columns, string $label = null, bool $sortable = false): InertiaTable
     {
         if (is_array($columns)) {
             foreach ($columns as $id => $label) {
