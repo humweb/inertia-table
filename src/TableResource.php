@@ -3,6 +3,7 @@
 namespace Humweb\InertiaTable;
 
 use Humweb\InertiaTable\Support\Makeable;
+use Humweb\InertiaTable\Export\QueryExport;
 use Spatie\QueryBuilder\QueryBuilder;
 
 abstract class TableResource
@@ -54,15 +55,28 @@ abstract class TableResource
      */
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
+        $this->buildQuery();
+        return $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
+    }
+
+    public function buildQuery()
+    {
         $this->applyDefaultSort()
             ->applySorts()
             ->applyGlobalFilter()
             ->applyCustomFilters()
             ->applyFilters();
 
-        return $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
     }
 
+    /**
+     * @return QueryExport
+     */
+    public function export(): QueryExport
+    {
+        $this->buildQuery();
+        return (new QueryExport($this->query))->headers($this->headers);
+    }
     /**
      * Add parameters from route
      *
@@ -163,6 +177,7 @@ abstract class TableResource
 
         return $this;
     }
+
 
     public function __call(string $name, $arguments)
     {
