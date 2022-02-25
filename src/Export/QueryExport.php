@@ -2,11 +2,9 @@
 
 namespace Humweb\InertiaTable\Export;
 
-
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-
 
 class QueryExport implements FromQuery, WithHeadings
 {
@@ -25,10 +23,9 @@ class QueryExport implements FromQuery, WithHeadings
      */
     public function __construct($query, $headers = null)
     {
-        $this->query   = $query;
+        $this->query = $query;
         $this->headers = $headers;
     }
-
 
     /**
      * @param array $headers
@@ -38,9 +35,9 @@ class QueryExport implements FromQuery, WithHeadings
     public function headers($headers = [])
     {
         $this->headers = $headers;
+
         return $this;
     }
-
 
     /**
      * @return \Illuminate\Database\Query\Builder
