@@ -52,16 +52,17 @@ class InertiaTableTest extends TestCase
     public function it_can_add_a_column_that_is_disabled_by_default()
     {
         $table = new InertiaTable($this->request());
-        $table->column('name', 'Name', false);
+        $table->column('name', 'Name', true, false);
 
         $props = $table->getQueryBuilderProps();
 
         Assert::assertArraySubset([
             "columns" => [
                 "name" => [
-                    "key"     => "name",
-                    "label"   => "Name",
-                    "enabled" => false,
+                    "key"      => "name",
+                    "label"    => "Name",
+                    "sortable" => true,
+                    "enabled"  => false,
                 ],
             ],
         ], $props);
