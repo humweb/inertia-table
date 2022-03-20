@@ -1,126 +1,151 @@
 <?php
 
-namespace Humweb\InertiaTable\Fields;
+namespace Humweb\Table\Fields;
 
-use Humweb\InertiaTable\Support\Makeable;
+use Humweb\Table\Sorts\BasicSort;
+use Humweb\Table\Sorts\Sort;
+use Humweb\Table\Traits\Makeable;
+use Humweb\Table\Traits\Metable;
+use Humweb\Table\Validation\HasValidationRules;
+use Illuminate\Support\Str;
+use JsonSerializable;
 
-class Field
+class Field implements JsonSerializable
 {
-    use Makeable;
+    use Makeable, Metable, HasValidationRules;
 
     /**
-     * Field name user for title and headers
-     *
      * @var string
      */
-    public string $name;
+    public string $component;
 
     /**
-     * Field data attribute/key
+     * The displayable name of the field.
+     *
+     * @var string|null
+     */
+    public ?string $name = null;
+
+    /**
+     * The attribute / column name of the field.
      *
      * @var string
      */
     public string $attribute;
 
     /**
-     * Field type
+     * The field's resolved value.
      *
-     * @var string
+     * @var mixed
      */
-    public string $type = 'text';
+    public mixed $value = null;
 
     /**
-     *
-     * @var string
+     * @var mixed
      */
-    public string $value;
+    public mixed $defaultValue = null;
 
+    /**
+     * Indicates if the field is nullable.
+     *
+     * @var bool
+     */
+    public bool $nullable = false;
+
+
+    /**
+     * @var bool|Sort
+     */
+    public bool|Sort $sortable = false;
+
+    /**
+     * @var Sort
+     */
+    public Sort $sortableStrategy;
+
+    /**
+     * @var bool
+     */
+    public bool $visible = true;
+
+    /**
+     * @var bool
+     */
     public bool $searchable = false;
 
-    /**
-     * Allow field to be sorted
-     *
-     * @var bool
-     */
-    public bool $sortable = false;
-
-
-    /**
-     * @var bool
-     */
-    public bool $hideable = true;
-    public bool $enabled = true;
-
-
-    /**
-     * Filter for query
-     *
-     * @var callable
-     */
-    public $filter;
-
-    /**
-     * @param  string       $name
-     * @param  string|null  $attribute
-     * @param  string       $value
-     */
-    public function __construct(string $name, string $attribute = null, string $value = '')
+    public function __construct($name, $attribute = null)
     {
-        $this->name = $name;
-        $this->attribute = $attribute ?: strtolower($name);
-        $this->value = $value;
+        if (is_null($this->name)) {
+            $this->name = $name;
+        }
+        $this->attribute = $attribute ?? str_replace(' ', '_', Str::lower($name));
+    }
+
+
+    /**
+     *
+     * @param  Sort|null  $class
+     *
+     * @return Field
+     */
+    public function sortable(?Sort $class = null): Field
+    {
+        $this->sortable         = true;
+        $this->sortableStrategy = is_null($class) ? new BasicSort() : $class;
+        return $this;
+    }
+
+
+    /**
+     * @param  bool  $nullable
+     *
+     * @return Field
+     */
+    public function nullable(): Field
+    {
+        $this->nullable = true;
+        return $this;
     }
 
     /**
-     * @return $this
+     *
+     * @param  bool  $bool
+     *
+     * @return Field
      */
-    public function searchable()
+    public function visible(bool $bool): Field
+    {
+        $this->visible = $bool;
+        return $this;
+    }
+
+    /**
+     * @return Field
+     */
+    public function searchable(): Field
     {
         $this->searchable = true;
-
         return $this;
     }
 
-    public function sortable()
+    public function getRuleAttribute()
     {
-        $this->sortable = true;
-
-        return $this;
+        return $this->attribute;
     }
 
-    public function hideable()
+    #[\ReturnTypeWillChange]
+    public function jsonSerialize()
     {
-        $this->hideable = true;
-
-        return $this;
+        return array_merge([
+            'component'  => $this->component,
+            'attribute'  => $this->attribute,
+            'name'       => $this->name,
+            'nullable'   => $this->nullable,
+            'sortable'   => $this->sortable,
+            'visible'    => $this->visible,
+            'searchable' => $this->searchable,
+            'value'      => is_null($this->value) ? $this->defaultValue : $this->value,
+        ], $this->meta());
     }
 
-    public function notHideable()
-    {
-        $this->hideable = false;
-
-        return $this;
-    }
-
-    public function filter($filter)
-    {
-        $this->filter = $filter;
-
-        return $this;
-    }
-
-    /**
-     * @param $method
-     * @param $parameters
-     *
-     * @return void
-     */
-    public function __call($method, $parameters)
-    {
-        if (property_exists($this, $method)) {
-            $this->$method = $parameters[0];
-
-            return $this;
-        }
-    }
 }

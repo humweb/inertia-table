@@ -1,0 +1,62 @@
+<?php
+
+namespace Humweb\Table;
+
+use App\Models\User;
+use Humweb\Table\Fields\FieldCollection;
+use Humweb\Table\Fields\ID;
+use Humweb\Table\Fields\Text;
+use Humweb\Table\Fields\Textarea;
+use Humweb\Table\Filters\FilterCollection;
+use Humweb\Table\Filters\TextFilter;
+use Humweb\Table\Filters\TrashedFilter;
+use Illuminate\Http\Request;
+
+class UserResource extends Resource
+{
+
+    protected $model = User::class;
+
+    public FieldCollection $field;
+    public FilterCollection $filters;
+
+
+
+    public function __construct(Request $request)
+    {
+        parent::__construct($request);
+    }
+
+    public function fields()
+    {
+        return FieldCollection::make([
+            ID::make('ID')->sortable()->searchable(),
+            Text::make('Name')->sortable(),
+            Textarea::make('Email')->sortable()
+        ]);
+    }
+
+    public function filters()
+    {
+        return FilterCollection::make([
+            TextFilter::make('id')->exact()->rules('numeric'),
+            TextFilter::make('name')->rules('string'),
+            TextFilter::make('email')->fullSearch()->rules('string'),
+            TrashedFilter::make('trashed')
+        ]);
+    }
+
+    public function globalFilter($query, $value)
+    {
+        return $query->where(function ($query) use ($value) {
+            $query->when(is_numeric($value), function ($query, $bool) use ($value) {
+                $query->orWhere('users.id', $value);
+            })->when(!is_numeric($value), function ($query, $bool) use ($value) {
+                $query->orWhere('name', 'ILIKE', "%{$value}%")
+                    ->orWhere('email', 'ILIKE', "%{$value}%");
+            });
+        });
+    }
+
+
+}

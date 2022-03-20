@@ -1,29 +1,31 @@
 <?php
 
-namespace Humweb\InertiaTable;
+namespace Humweb\Table;
 
 use Humweb\InertiaTable\Filters\Filter;
+use Humweb\Table\Fields\FieldCollection;
+use Humweb\Table\Filters\FilterCollection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Inertia\Response;
 
 class InertiaTable
 {
-    private Request $request;
-    private Collection $columns;
+    public Request $request;
+    private FieldCollection $columns;
     private Collection $search;
-    private Collection $filters;
+    private FilterCollection $filters;
     private bool $globalSearch = true;
-    private bool $download = false;
+    public LengthAwarePaginator|null $records = null;
 
     public function __construct(Request $request)
     {
         $this->request = $request;
 
-        $this->columns = collect();
         $this->search = collect();
-        $this->filters = collect();
     }
 
     /**
@@ -39,25 +41,22 @@ class InertiaTable
     }
 
     /**
-     * Collects all properties and sets the default
-     * values from the request query.
+     * Build main props to share with table component
      *
      * @return array
      */
     public function getQueryBuilderProps(): array
     {
         $columns = $this->transformColumns();
-        $search = $this->transformSearch();
+        $search  = $this->transformSearch();
         $filters = $this->transformFilters();
 
         return [
-            'sort' => $this->request->query('sort'),
-            'page' => Paginator::resolveCurrentPage(),
+            'sort'    => $this->request->query('sort'),
+            'page'    => Paginator::resolveCurrentPage(),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
-            'download' => 0,
-            'downloadable' => $this->download,
         ];
     }
 
@@ -68,15 +67,15 @@ class InertiaTable
      */
     private function transformColumns(): Collection
     {
-        $columns = $this->request->query('columns', []);
+        $columns = explode(',', $this->request->query('hidden', ''));
 
         if (empty($columns)) {
             return $this->columns;
         }
 
         return $this->columns->map(function ($column, $key) use ($columns) {
-            if (! in_array($key, $columns)) {
-                $column['enabled'] = false;
+            if (in_array($column->attribute, $columns)) {
+                $column->visible(false);
             }
 
             return $column;
@@ -94,7 +93,7 @@ class InertiaTable
 
         if ($this->globalSearch) {
             $search->prepend([
-                'key' => 'global',
+                'key'   => 'global',
                 'label' => 'global',
                 'value' => null,
             ], 'global');
@@ -107,11 +106,11 @@ class InertiaTable
         }
 
         return $search->map(function ($search, $key) use ($filters) {
-            if (! array_key_exists($key, $filters)) {
+            if (!array_key_exists($key, $filters)) {
                 return $search;
             }
 
-            $search['value'] = $filters[$key];
+            $search['value']   = $filters[$key];
             $search['enabled'] = true;
 
             return $search;
@@ -125,26 +124,18 @@ class InertiaTable
      */
     private function transformFilters(): Collection
     {
-        $filters = $this->request->query('filter', []);
+        $requestFilters = $this->request->query('filters', []);
 
-        if (empty($filters)) {
+        if (empty($requestFilters)) {
             return $this->filters;
         }
 
-        return $this->filters->map(function ($filter) use ($filters) {
-            if (! array_key_exists($filter->key, $filters)) {
-                return $filter->toArray();
+        return $this->filters->map(function ($filter) use ($requestFilters) {
+            if (array_key_exists($filter->field, $requestFilters)) {
+                $filter->value = $requestFilters[$filter->field];
             }
 
-            $filter->value = $filters[$filter->key];
-
-            if (! array_key_exists($filter->value, $filter->options ?? [])) {
-                return $filter->toArray();
-            }
-
-//            $filter->value = $value;
-
-            return $filter->toArray();
+            return $filter;
         });
     }
 
@@ -157,47 +148,23 @@ class InertiaTable
      */
     public function shareProps(Response $response): Response
     {
+        if ($this->records instanceof LengthAwarePaginator) {
+            $paginated = $this->records->toArray();
+            $response->with('records', $paginated['data'])
+                ->with('pagination', Arr::except($paginated, 'data'));
+        }
         return $response->with('queryBuilderProps', $this->getQueryBuilderProps());
     }
 
-    /**
-     * Add a column to the query builder.
-     *
-     * @param  string|array  $key
-     * @param  string        $label
-     * @param  bool          $enabled
-     *
-     * @return self
-     */
-    public function column(array|string $key, string $label, bool $sortable = false, bool $enabled = true): self
-    {
-        $this->columns->put($key, [
-            'key' => $key,
-            'label' => $label,
-            'enabled' => $enabled,
-            'sortable' => $sortable,
-        ]);
 
-        return $this;
-    }
-
-    public function columns(array $columns = []): InertiaTable
+    public function columns(array|FieldCollection $columns = []): InertiaTable
     {
-        foreach ($columns as $key => $value) {
-            if (is_array($value)) {
-                $this->column($key, $value['label'], $value['sortable'] ?? true, $value['enabled'] ?? true);
-            } else {
-                $this->column($key, $value, true, true);
-            }
+        if (!($columns instanceof FieldCollection)) {
+            $columns = FieldCollection::make($columns);
         }
 
+        $this->columns = $columns;
         return $this;
-    }
-
-    public function columnAndSearchable(string $key, string $label, bool $sortable = true): InertiaTable
-    {
-        return $this->column($key, $label, true, $sortable)
-            ->searchable($key, $label);
     }
 
     /**
@@ -208,7 +175,7 @@ class InertiaTable
      *
      * @return self
      */
-    public function searchable(string|array $columns, string $label = null, bool $sortable = false): InertiaTable
+    public function searchable(string|array $columns, string $label = null, $value = null): InertiaTable
     {
         if (is_array($columns)) {
             foreach ($columns as $id => $label) {
@@ -216,37 +183,35 @@ class InertiaTable
             }
         } else {
             $this->search->put($columns, [
-                'key' => $columns,
-                'label' => $label,
-                'value' => null,
+                'key'     => $columns,
+                'label'   => $label,
+                'value'   => $value,
+                'enabled' => !is_null($value)
             ]);
         }
 
         return $this;
     }
 
-    /**
-     * Add a filter to the query builder.
-     *
-     * @param  Filter  $filter
-     *
-     * @return InertiaTable
-     */
-    public function filter(Filter $filter): InertiaTable
+    public function filters(FilterCollection|array $filters): InertiaTable
     {
-        $this->filters->put($filter->key, $filter);
+        if (is_array($filters)) {
+            $filters = FilterCollection::make($filters);
+        }
+        $this->filters = $filters;
 
         return $this;
     }
 
+
     /**
+     * @param  LengthAwarePaginator  $records
      *
      * @return InertiaTable
      */
-    public function downloadable(): InertiaTable
+    public function records(LengthAwarePaginator $records)
     {
-        $this->download = true;
-
+        $this->records = $records;
         return $this;
     }
 }

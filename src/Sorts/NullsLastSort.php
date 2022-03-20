@@ -3,7 +3,6 @@
 namespace Humweb\InertiaTable\Sorts;
 
 use Illuminate\Database\Eloquent\Builder;
-use Spatie\QueryBuilder\Sorts\Sort;
 
 class NullsLastSort implements Sort
 {
@@ -11,6 +10,10 @@ class NullsLastSort implements Sort
     {
         $direction = $descending ? 'DESC' : 'ASC';
 
-        $query->orderByRaw("{$property} {$direction} NULLS LAST");
+        if ($query->getConnection()->getDriverName() == 'pgsql') {
+            $query->orderByRaw("{$property} {$direction} NULLS LAST");
+        } else {
+            $query->orderByRaw("{$property} IS NULL, {$property} {$direction}");
+        }
     }
 }

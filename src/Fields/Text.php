@@ -1,13 +1,12 @@
 <?php
 
-namespace Humweb\InertiaTable\Fields;
+namespace Humweb\Table\Fields;
 
 class Text extends Field
 {
     /**
-     * Field type
-     *
      * @var string
      */
-    public string $type = 'text';
+    public string $component = 'text-field';
+
 }
