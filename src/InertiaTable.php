@@ -15,17 +15,18 @@ use Inertia\Response;
 class InertiaTable
 {
     public Request $request;
-    private FieldCollection $columns;
-    private Collection $search;
-    private FilterCollection $filters;
-    private bool $globalSearch = true;
+    public FieldCollection $columns;
+    public FilterCollection $filters;
+    public Collection $search;
+    public bool $globalSearch = true;
     public LengthAwarePaginator|null $records = null;
 
     public function __construct(Request $request)
     {
         $this->request = $request;
-
-        $this->search = collect();
+        $this->columns = FieldCollection::make([]);
+        $this->filters = FilterCollection::make([]);
+        $this->search  = collect();
     }
 
     /**
@@ -99,22 +100,17 @@ class InertiaTable
             ], 'global');
         }
 
-        $filters = $this->request->query('filter', []);
+        $requestSearches = $this->request->query('search', []);
 
-        if (empty($filters)) {
+        if (empty($requestSearches)) {
             return $search;
         }
 
-        return $search->map(function ($search, $key) use ($filters) {
-            if (!array_key_exists($key, $filters)) {
-                return $search;
-            }
-
-            $search['value']   = $filters[$key];
-            $search['enabled'] = true;
-
-            return $search;
-        });
+        $this->columns->filter(fn($f) => $f->searchable)
+            ->each(function ($f) use ($requestSearches) {
+                $this->searchable($f->attribute, $f->name, Arr::get($requestSearches, $f->attribute));
+            });
+        return $this->search;
     }
 
     /**
