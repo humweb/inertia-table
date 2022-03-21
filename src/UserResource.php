@@ -27,7 +27,7 @@ class UserResource extends Resource
         parent::__construct($request);
     }
 
-    public function fields()
+    public function fields(): FieldCollection
     {
         return FieldCollection::make([
             ID::make('ID')->sortable()->searchable(),
@@ -56,6 +56,17 @@ class UserResource extends Resource
                     ->orWhere('email', 'ILIKE', "%{$value}%");
             });
         });
+    }
+
+    /**
+     * @param  string  $model
+     *
+     * @return UserResource
+     */
+    public function model(string $model): UserResource
+    {
+        $this->model = $model;
+        return $this;
     }
 
 
