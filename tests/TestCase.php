@@ -1,9 +1,15 @@
 <?php
 
-namespace Humweb\InertiaTable\Tests;
+namespace Humweb\Table\Tests;
 
-use Humweb\InertiaTable\InertiaTableServiceProvider;
+use Humweb\Table\InertiaTableServiceProvider;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Testing\Assert;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -13,8 +19,9 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Humweb\\InertiaTable\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'Humweb\\Table\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
+
     }
 
     protected function getPackageProviders($app)
@@ -28,9 +35,46 @@ class TestCase extends Orchestra
     {
         config()->set('database.default', 'testing');
 
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_inertia-table_table.php.stub';
-        $migration->up();
-        */
+        $app['db']->connection()->getSchemaBuilder()->create('test_users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->timestamps();
+        });
+
+    }
+
+    protected function request(callable $callback = null): Request
+    {
+        $request = Request::createFromGlobals();
+
+        return $callback ? tap($request, $callback) : $request;
+    }
+
+    protected function assertQueryLogContains(string $partialSql)
+    {
+        $queryLog = collect(DB::getQueryLog())->pluck('query')->implode('|');
+
+        $this->assertStringContainsString($partialSql, $queryLog);
+    }
+
+    protected function assertQueryLogDoesntContain(string $partialSql)
+    {
+        $queryLog = collect(DB::getQueryLog())->pluck('query')->implode('|');
+
+
+        $this->assertStringNotContainsString($partialSql, $queryLog);
+    }
+
+    public function sortCallback(Builder $query, $descending): void
+    {
+        $query->orderBy('name', $descending ? 'DESC' : 'ASC');
+    }
+
+    public function filterCallback(Builder $query, $value): void
+    {
+        $query->where('name', $value);
     }
 }
