@@ -2,17 +2,14 @@
 
 namespace Humweb\Table\Traits;
 
-
 trait Metable
 {
-
     /**
      * The meta data for the element.
      *
      * @var array
      */
     public array $meta = [];
-
 
     /**
      * Get additional meta information to merge with the element payload.
@@ -37,5 +34,4 @@ trait Metable
 
         return $this;
     }
-
 }

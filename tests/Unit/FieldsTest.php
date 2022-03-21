@@ -2,14 +2,12 @@
 
 namespace Humweb\Table\Tests\Unit;
 
-
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Fields\ID;
 use Humweb\Table\Fields\Text;
 use Humweb\Table\Fields\Textarea;
 use Humweb\Table\Tests\TestCase;
 use Illuminate\Testing\Assert;
-
 
 class FieldsTest extends TestCase
 {
@@ -22,9 +20,8 @@ class FieldsTest extends TestCase
         $this->fieldCollection = new FieldCollection([
             ID::make()->sortable(),
             Text::make('Title')->sortable(),
-            Textarea::make('Body')->sortable()->rows(10)->nullable()
+            Textarea::make('Body')->sortable()->rows(10)->nullable(),
         ]);
-
     }
 
     /**
@@ -63,7 +60,6 @@ class FieldsTest extends TestCase
 
         $this->assertEquals('id', $id->attribute);
         $this->assertEquals('title', $title->attribute);
-
     }
 
     /**
@@ -76,7 +72,6 @@ class FieldsTest extends TestCase
 
         $this->assertEquals('id', $collection[0]['attribute']);
         $this->assertEquals('id', $serialize[0]['attribute']);
-
     }
 
     /**
@@ -87,7 +82,6 @@ class FieldsTest extends TestCase
         $body = $this->fieldCollection->find('body');
 
         $this->assertEquals(10, $body->rows);
-
     }
 
     /**
@@ -99,13 +93,11 @@ class FieldsTest extends TestCase
 
         $this->assertEquals('foobar', $field->meta()['placeholder']);
         Assert::assertArraySubset([
-            'placeholder' => 'foobar'
+            'placeholder' => 'foobar',
         ], $field->jsonSerialize());
 //        $this->assertEquals('title', $field->attribute);
 //
 //        $this->assertEquals('id', ID::make()->attribute);
 //        $this->assertEquals('id', ID::make()->getRuleAttribute());
-
     }
-
 }

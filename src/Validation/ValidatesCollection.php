@@ -21,10 +21,9 @@ trait ValidatesCollection
     public function getValidationRules($key)
     {
         return $this->filter(function ($item) {
-            return !empty($item->rules);
+            return ! empty($item->rules);
         })->mapWithKeys(function ($item) use ($key) {
             return [$item->$key => $item->rules];
         })->all();
     }
-
 }

@@ -12,7 +12,6 @@ class FilterCollection extends Collection implements JsonSerializable
 {
     use ValidatesCollection;
 
-
     public function apply(Request $request, $query)
     {
         $reqFilters = $request->get('filters');

@@ -14,7 +14,7 @@ trait Makeable
         if (count($arguments)) {
             return new static(...$arguments);
         }
+
         return new static();
     }
-
 }

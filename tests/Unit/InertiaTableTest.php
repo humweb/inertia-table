@@ -2,7 +2,6 @@
 
 namespace Humweb\Table\Tests\Unit;
 
-
 use Humweb\Table\Fields\Text;
 use Humweb\Table\Filters\SelectFilter;
 use Humweb\Table\InertiaTable;
@@ -56,27 +55,26 @@ class InertiaTableTest extends TestCase
 
         Assert::assertArraySubset([
             "columns" => [
-                Text::make('name', 'Name')->visible(false)
+                Text::make('name', 'Name')->visible(false),
             ],
         ], $props);
     }
-
 
     /** @test */
     public function it_can_add_a_search_row()
     {
         $table = new InertiaTable($this->request());
         $table->columns([
-            Text::make('Name')->searchable()
+            Text::make('Name')->searchable(),
         ]);
 
         $props = $table->getQueryBuilderProps();
 
         Assert::assertArraySubset([
-            "attribute"  => "name",
-            "name"       => "Name",
+            "attribute" => "name",
+            "name" => "Name",
             "searchable" => true,
-            "value"      => null,
+            "value" => null,
         ], $props['columns'][0]->jsonSerialize());
     }
 
@@ -85,12 +83,12 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('search', [
-                'name' => 'foobar'
+                'name' => 'foobar',
             ]);
         }));
 
         $table->columns([
-            Text::make('Name')->searchable()
+            Text::make('Name')->searchable(),
         ]);
 
 
@@ -104,14 +102,14 @@ class InertiaTableTest extends TestCase
     {
         $table = new InertiaTable($this->request(function (Request $request) {
             $request->query->set('filters', [
-                'name'    => 'foo',
-                'email'   => 'bar',
+                'name' => 'foo',
+                'email' => 'bar',
             ]);
         }));
 
         $table->filters([
             SelectFilter::make('name', 'Name', ['foo' => 'foobar']),
-            SelectFilter::make('email', 'Email', ['bar' => 'bar@email.com', 'foo' => 'foo@email.com'])
+            SelectFilter::make('email', 'Email', ['bar' => 'bar@email.com', 'foo' => 'foo@email.com']),
         ]);
 
         $props = $table->getQueryBuilderProps();
@@ -128,7 +126,7 @@ class InertiaTableTest extends TestCase
             SelectFilter::make('name', 'Name', [
             'a' => 'Option A',
             'b' => 'Option B',
-        ])]);
+        ]), ]);
 
         $props = $table->getQueryBuilderProps();
 

@@ -2,7 +2,6 @@
 
 namespace Humweb\Table\Tests\Unit;
 
-
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Filters\SelectFilter;
 use Humweb\Table\Filters\TextFilter;
@@ -56,14 +55,13 @@ class FilterTest extends TestCase
         $this->assertEquals('First Name', $filter->label);
     }
 
-
     public function test_it_can_test_apply_filter()
     {
         $builder = DB::table('users');
 
         $filter = SelectFilter::make('colors', 'Colors', [
-            'blue'  => 'blue',
-            'red'   => 'red',
+            'blue' => 'blue',
+            'red' => 'red',
             'green' => 'green',
         ]);
 
@@ -78,32 +76,31 @@ class FilterTest extends TestCase
         $builder = DB::table('users');
 
         $filter = SelectFilter::make('colors', 'Colors', [
-            'blue'  => 'blue',
-            'red'   => 'red',
+            'blue' => 'blue',
+            'red' => 'red',
             'green' => 'green',
         ])->multiple();
 
         $filter->apply($this->request(), $builder, ['blue', 'red']);
 
         $this->assertEquals('select * from "users" where "colors" in (?, ?)', $builder->toSql());
-        $this->assertTrue( $filter->jsonSerialize()['multiple']);
+        $this->assertTrue($filter->jsonSerialize()['multiple']);
     }
+
     public function test_it_can_test_where_multiple_filter()
     {
         $builder = DB::table('users');
 
         $filter = SelectFilter::make('colors', 'Colors', [
-            'blue'  => 'blue',
-            'red'   => 'red',
+            'blue' => 'blue',
+            'red' => 'red',
             'green' => 'green',
         ])->multiple();
 
         $filter->whereFilter($builder, ['blue', 'red']);
 
         $this->assertEquals('select * from "users" where "colors" in (?, ?)', $builder->toSql());
-        $this->assertTrue( $filter->jsonSerialize()['multiple']);
-
-
+        $this->assertTrue($filter->jsonSerialize()['multiple']);
     }
 
     public function test_it_can_test_where_exact_filter()
@@ -152,29 +149,24 @@ class FilterTest extends TestCase
         $this->assertEquals('%blue%', $builder->getBindings()[0]);
     }
 
-
     public function test_it_can_filter_validation_rules()
     {
         $filter = TextFilter::make('colors')->rules('string');
 
         $this->assertEquals('string', $filter->getRules($this->request())[0]);
-
     }
 
     public function test_it_can_validate_collection()
     {
         $filters = new FilterCollection([
             TextFilter::make('colors')->rules('string'),
-            TextFilter::make('name')->rules('string','max:5'),
+            TextFilter::make('name')->rules('string', 'max:5'),
         ]);
 
         $this->expectException(ValidationException::class);
-        $filters->validateFilterInput($this->request(function(Request $request){
+        $filters->validateFilterInput($this->request(function (Request $request) {
             $request->query->set('colors', 'blue');
             $request->query->set('name', 'joebob');
         })->all());
-
     }
-
-
 }

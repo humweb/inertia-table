@@ -2,7 +2,6 @@
 
 namespace Humweb\Table;
 
-
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Traits\Makeable;
@@ -83,12 +82,13 @@ abstract class Resource
         $reqSearch = $this->request->get('search');
 
         if ($reqSearch) {
-            $this->fields()->filter(fn($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
-                if (isset($reqSearch[$field->attribute]) && !empty($reqSearch[$field->attribute])) {
+            $this->fields()->filter(fn ($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
+                if (isset($reqSearch[$field->attribute]) && ! empty($reqSearch[$field->attribute])) {
                     $this->whereLike($field->attribute, $reqSearch[$field->attribute]);
                 }
             });
         }
+
         return $this;
     }
 
@@ -96,10 +96,10 @@ abstract class Resource
     {
         if ($this->driver == 'pgsql') {
             $field = $field;
-            $like  = 'ilike';
+            $like = 'ilike';
         } else {
             $field = "LOWER('{$field}')";
-            $like  = 'like';
+            $like = 'like';
         }
 
         $this->query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
@@ -173,7 +173,7 @@ abstract class Resource
      */
     public function applyDefaultSort(): Resource
     {
-        if ($this->request->has('sort')){
+        if ($this->request->has('sort')) {
             return $this;
         }
 
@@ -194,7 +194,7 @@ abstract class Resource
     public function applySorts(): Resource
     {
         if ($this->request->has('sort')) {
-            $sortField  = $this->request->get('sort');
+            $sortField = $this->request->get('sort');
             $descending = str_starts_with($sortField, '-');
 
             if ($descending) {
@@ -210,7 +210,6 @@ abstract class Resource
 
         return $this;
     }
-
 
     /**
      * Add global filter if it exists
@@ -248,7 +247,6 @@ abstract class Resource
         return new FilterCollection([]);
     }
 
-
     public function __call(string $name, $arguments)
     {
         return $this->forwardCallTo($this->query, $name, $arguments);
@@ -266,5 +264,4 @@ abstract class Resource
     {
         return $this->query;
     }
-
 }

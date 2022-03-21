@@ -2,7 +2,6 @@
 
 namespace Humweb\Table\Tests\Models;
 
-
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Fields\ID;
 use Humweb\Table\Fields\Text;
@@ -15,13 +14,10 @@ use Illuminate\Http\Request;
 
 class UserResource extends Resource
 {
-
     protected $model = User::class;
 
     public FieldCollection $field;
     public FilterCollection $filters;
-
-
 
     public function __construct(Request $request)
     {
@@ -36,7 +32,7 @@ class UserResource extends Resource
         return FieldCollection::make([
             ID::make('ID')->sortable()->searchable(),
             Text::make('Name')->sortable()->searchable(),
-            Textarea::make('Email')->sortable()
+            Textarea::make('Email')->sortable(),
         ]);
     }
 
@@ -49,7 +45,7 @@ class UserResource extends Resource
             TextFilter::make('id')->exact()->rules('numeric'),
             TextFilter::make('name')->rules('string'),
             TextFilter::make('email')->fullSearch()->rules('string'),
-            TrashedFilter::make('trashed')
+            TrashedFilter::make('trashed'),
         ]);
     }
 
@@ -58,7 +54,7 @@ class UserResource extends Resource
         return $query->where(function ($query) use ($value) {
             $query->when(is_numeric($value), function ($query, $bool) use ($value) {
                 $query->orWhere('id', $value);
-            })->when(!is_numeric($value), function ($query, $bool) use ($value) {
+            })->when(! is_numeric($value), function ($query, $bool) use ($value) {
                 $query->orWhere('name', 'ILIKE', "%{$value}%")
                     ->orWhere('email', 'ILIKE', "%{$value}%");
             });
@@ -73,6 +69,7 @@ class UserResource extends Resource
     public function model(string $model): UserResource
     {
         $this->model = $model;
+
         return $this;
     }
 
@@ -80,5 +77,4 @@ class UserResource extends Resource
     {
         return $value();
     }
-
 }

@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Illuminate\Testing\Assert;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -21,7 +19,6 @@ class TestCase extends Orchestra
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => 'Humweb\\Table\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
-
     }
 
     protected function getPackageProviders($app)
@@ -43,7 +40,6 @@ class TestCase extends Orchestra
             $table->string('password');
             $table->timestamps();
         });
-
     }
 
     protected function request(callable $callback = null): Request
