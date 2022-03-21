@@ -3,27 +3,45 @@
 namespace Humweb\Table;
 
 
+use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Traits\Makeable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 abstract class Resource
 {
     use Makeable;
 
-    protected array $parameters = [];
+    public array $parameters = [];
 
+    protected Request $request;
     /**
      * @var FilterCollection
      */
     protected FilterCollection $filters;
-    protected $query;
+    /**
+     * @var Builder
+     */
+    protected Builder $query;
+
+    /**
+     * @var array
+     */
     protected array $sorts;
-    protected string|Sort $defaultSort = 'id';
+
+    /**
+     * @var string|Sort
+     */
+    public string|Sort $defaultSort = 'id';
+
+    public $driver = 'pgsql';
+
+    /**
+     * @var string
+     */
     protected $model;
-    protected Request $request;
 
     public function __construct(Request $request)
     {
@@ -31,24 +49,6 @@ abstract class Resource
         $this->request = $request;
 //        $this->parameters = $parameters;
         $this->filters = new FilterCollection();
-    }
-
-    /**
-     * Add filter for allowed filters
-     *
-     * @param $filter
-     *
-     * @return $this
-     */
-    public function addFilter($filter): Resource
-    {
-        if (is_array($filter)) {
-            $this->filters = $this->filters->merge($filter);
-        } else {
-            $this->filters->push($filter);
-        }
-
-        return $this;
     }
 
     /**
@@ -81,6 +81,7 @@ abstract class Resource
     public function applySearch()
     {
         $reqSearch = $this->request->get('search');
+
         if ($reqSearch) {
             $this->fields()->filter(fn($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
                 if (isset($reqSearch[$field->attribute]) && !empty($reqSearch[$field->attribute])) {
@@ -93,7 +94,7 @@ abstract class Resource
 
     public function whereLike($field, $value)
     {
-        if ($this->query->getConnection()->getDriverName() == 'pgsql') {
+        if ($this->driver == 'pgsql') {
             $field = $field;
             $like  = 'ilike';
         } else {
@@ -112,7 +113,7 @@ abstract class Resource
      *
      * @return void
      */
-    public function addParameter($key, $value): Resource
+    public function addParameter($key, $value = null): Resource
     {
         if (is_array($key)) {
             $this->parameters = array_merge($this->parameters, $key);
@@ -131,6 +132,7 @@ abstract class Resource
     public function newQuery(): Resource
     {
         $this->query = $this->model::query();
+        $this->driver = $this->query->getConnection()->getDriverName();
 
         return $this;
     }
@@ -171,12 +173,14 @@ abstract class Resource
      */
     public function applyDefaultSort(): Resource
     {
-        if ($this->defaultSort && method_exists($this, 'defaultSort')) {
-            $this->defaultSort($this->defaultSort);
-        } else {
-            if (is_string($this->defaultSort) && !$this->request->has('sort')) {
-                $this->request->merge(['sort' => $this->defaultSort]);
-            }
+        if ($this->request->has('sort')){
+            return $this;
+        }
+
+        if (method_exists($this, 'defaultSort')) {
+            $this->defaultSort($this->query);
+        } elseif (is_string($this->defaultSort)) {
+            $this->request->merge(['sort' => $this->defaultSort]);
         }
 
         return $this;
@@ -233,13 +237,17 @@ abstract class Resource
         $table->columns($fields)
             ->filters($this->filters())
             ->records($this->paginate());
-        $fields->filter(fn($f) => $f->searchable)
-            ->each(function ($f) use ($table) {
-                $table->searchable($f->attribute, $f->name, Arr::get($this->request->get('search', []), $f->attribute));
-            })->all();
 
         return $table;
     }
+
+    abstract public function fields(): FieldCollection;
+
+    public function filters()
+    {
+        return new FilterCollection([]);
+    }
+
 
     public function __call(string $name, $arguments)
     {
@@ -250,4 +258,13 @@ abstract class Resource
     {
         return $object->{$method}(...$parameters);
     }
+
+    /**
+     * @return Builder
+     */
+    public function getQuery(): Builder
+    {
+        return $this->query;
+    }
+
 }
