@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class CallbackSort implements Sort
 {
-
-
     private $callback;
 
     public function __construct($callback)

@@ -4,7 +4,6 @@ namespace Humweb\Table\Fields;
 
 class Textarea extends Field
 {
-
     /**
      * The field's component.
      *
@@ -32,7 +31,6 @@ class Textarea extends Field
         return $this;
     }
 
-
     /**
      * Prepare the element for JSON serialization.
      *
@@ -41,7 +39,7 @@ class Textarea extends Field
     public function jsonSerialize()
     {
         return array_merge(parent::jsonSerialize(), [
-            'rows' => $this->rows
+            'rows' => $this->rows,
         ]);
     }
 }

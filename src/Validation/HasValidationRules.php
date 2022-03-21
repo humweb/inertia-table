@@ -7,14 +7,11 @@ use Illuminate\Validation\Rule;
 
 trait HasValidationRules
 {
-
-
     /**
      *
      * @var mixed
      */
     public mixed $rules = '';
-
 
     /**
      * Set the validation rules for the field.
@@ -41,5 +38,4 @@ trait HasValidationRules
     {
         return is_callable($this->rules) ? call_user_func($this->rules, $request) : $this->rules;
     }
-
 }

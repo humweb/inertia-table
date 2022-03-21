@@ -2,7 +2,6 @@
 
 namespace Humweb\Table;
 
-use Humweb\InertiaTable\Filters\Filter;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -26,7 +25,7 @@ class InertiaTable
         $this->request = $request;
         $this->columns = FieldCollection::make([]);
         $this->filters = FilterCollection::make([]);
-        $this->search  = collect();
+        $this->search = collect();
     }
 
     /**
@@ -49,14 +48,14 @@ class InertiaTable
     public function getQueryBuilderProps(): array
     {
         $columns = $this->transformColumns();
-        $search  = $this->transformSearch();
+        $search = $this->transformSearch();
         $filters = $this->transformFilters();
 
         return [
-            'sort'    => $this->request->query('sort'),
-            'page'    => Paginator::resolveCurrentPage(),
+            'sort' => $this->request->query('sort'),
+            'page' => Paginator::resolveCurrentPage(),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
@@ -94,7 +93,7 @@ class InertiaTable
 
         if ($this->globalSearch) {
             $search->prepend([
-                'key'   => 'global',
+                'key' => 'global',
                 'label' => 'global',
                 'value' => null,
             ], 'global');
@@ -106,10 +105,11 @@ class InertiaTable
             return $search;
         }
 
-        $this->columns->filter(fn($f) => $f->searchable)
+        $this->columns->filter(fn ($f) => $f->searchable)
             ->each(function ($f) use ($requestSearches) {
                 $this->searchable($f->attribute, $f->name, Arr::get($requestSearches, $f->attribute));
             });
+
         return $this->search;
     }
 
@@ -149,17 +149,18 @@ class InertiaTable
             $response->with('records', $paginated['data'])
                 ->with('pagination', Arr::except($paginated, 'data'));
         }
+
         return $response->with('queryBuilderProps', $this->getQueryBuilderProps());
     }
 
-
     public function columns(array|FieldCollection $columns = []): InertiaTable
     {
-        if (!($columns instanceof FieldCollection)) {
+        if (! ($columns instanceof FieldCollection)) {
             $columns = FieldCollection::make($columns);
         }
 
         $this->columns = $columns;
+
         return $this;
     }
 
@@ -179,10 +180,10 @@ class InertiaTable
             }
         } else {
             $this->search->put($columns, [
-                'key'     => $columns,
-                'label'   => $label,
-                'value'   => $value,
-                'enabled' => !is_null($value)
+                'key' => $columns,
+                'label' => $label,
+                'value' => $value,
+                'enabled' => ! is_null($value),
             ]);
         }
 
@@ -199,7 +200,6 @@ class InertiaTable
         return $this;
     }
 
-
     /**
      * @param  LengthAwarePaginator  $records
      *
@@ -208,6 +208,7 @@ class InertiaTable
     public function records(LengthAwarePaginator $records)
     {
         $this->records = $records;
+
         return $this;
     }
 }

@@ -2,14 +2,12 @@
 
 namespace Humweb\Table\Tests\Unit;
 
-
 use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\Models\UserResource;
 use Humweb\Table\Tests\TestCase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
 
 class ResourceTest extends TestCase
 {
@@ -33,7 +31,6 @@ class ResourceTest extends TestCase
         $this->assertQueryLogContains('select * from "test_users" order by "id" asc limit 15 offset 0');
     }
 
-
     /**
      * @return void
      */
@@ -42,10 +39,10 @@ class ResourceTest extends TestCase
         DB::enableQueryLog();
         $this->resource = UserResource::make($this->request(function (Request $request) {
             $request->query->set('search', [
-                'name' => 'foobar'
+                'name' => 'foobar',
             ]);
         }));
-        $output         = $this->resource->paginate();
+        $output = $this->resource->paginate();
 //        $this->assertQueryLogContains('select count(*) as aggregate from "test_users"');
         $this->assertQueryLogContains('select count(*) as aggregate from "test_users" where LOWER(\'name\') like ?');
     }
@@ -58,7 +55,7 @@ class ResourceTest extends TestCase
         DB::enableQueryLog();
         $this->resource = UserResource::make($this->request(function (Request $request) {
             $request->query->set('search', [
-                'name' => 'foobar'
+                'name' => 'foobar',
             ]);
         }));
 
@@ -68,7 +65,6 @@ class ResourceTest extends TestCase
 
         $this->assertEquals('select * from "test_users" where name ilike ?', $output);
     }
-
 
     /**
      * @return void
@@ -105,7 +101,7 @@ class ResourceTest extends TestCase
     {
         DB::enableQueryLog();
 
-        $this->resource = new class($this->request()) extends UserResource {
+        $this->resource = new class ($this->request()) extends UserResource {
             public function defaultSort(Builder $query)
             {
                 $query->orderBy('name', 'desc');
@@ -149,7 +145,7 @@ class ResourceTest extends TestCase
 
         $this->resource = UserResource::make($this->request(function (Request $request) {
             $request->query->set('search', [
-                'global' => 1
+                'global' => 1,
             ]);
         }));
 

@@ -2,7 +2,6 @@
 
 namespace Humweb\Table\Filters;
 
-
 use Humweb\Table\Traits\Makeable;
 use Humweb\Table\Traits\Metable;
 
@@ -14,7 +13,9 @@ use JsonSerializable;
 
 abstract class Filter implements JsonSerializable
 {
-    use Makeable, Metable, HasValidationRules;
+    use Makeable;
+    use Metable;
+    use HasValidationRules;
 
     /**
      * @var string
@@ -59,11 +60,11 @@ abstract class Filter implements JsonSerializable
         $this->field = $field;
         $this->value = $value;
 
-        if (!empty($options)) {
+        if (! empty($options)) {
             $this->options = $options;
         }
 
-        if (!empty($label)) {
+        if (! empty($label)) {
             $this->label = $label;
         }
 
@@ -86,19 +87,19 @@ abstract class Filter implements JsonSerializable
 
     public function whereFilter($query, $value)
     {
-
         if (property_exists($this, 'multiple') && $this->multiple) {
             $query->whereIn($this->field, $value);
+
             return;
         }
 
         if ($this->exact) {
             $query->where($this->field, $value);
+
             return;
         }
 
-        if ($query->getConnection()->getDriverName() == 'pgsql')
-        {
+        if ($query->getConnection()->getDriverName() == 'pgsql') {
             $field = $this->field;
             $like = 'ilike';
         } else {
@@ -109,11 +110,9 @@ abstract class Filter implements JsonSerializable
 
         if ($this->startsWith) {
             $query->where(DB::raw($field), $like, strtolower($value).'%');
-        }
-        elseif ($this->endsWith) {
+        } elseif ($this->endsWith) {
             $query->where(DB::raw($field), $like, '%'.strtolower($value));
-        }
-        else {
+        } else {
             $query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
         }
     }
@@ -133,18 +132,15 @@ abstract class Filter implements JsonSerializable
         }
     }
 
-
     public function jsonSerialize()
     {
         return array_merge([
             'component' => $this->component,
-            'field'     => $this->field,
-            'options'   => $this->options,
-            'label'     => $this->label,
-            'value'     => $this->value,
-            'rules'     => $this->rules
+            'field' => $this->field,
+            'options' => $this->options,
+            'label' => $this->label,
+            'value' => $this->value,
+            'rules' => $this->rules,
         ], $this->meta());
     }
-
-
 }

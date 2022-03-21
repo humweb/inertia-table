@@ -1,8 +1,6 @@
 <?php
 
-use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\TestCase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 uses(TestCase::class)->in(__DIR__);

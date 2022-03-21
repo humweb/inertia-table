@@ -12,7 +12,9 @@ use JsonSerializable;
 
 class Field implements JsonSerializable
 {
-    use Makeable, Metable, HasValidationRules;
+    use Makeable;
+    use Metable;
+    use HasValidationRules;
 
     /**
      * @var string
@@ -81,7 +83,6 @@ class Field implements JsonSerializable
         $this->attribute = $attribute ?? str_replace(' ', '_', Str::lower($name));
     }
 
-
     /**
      *
      * @param  Sort|null  $class
@@ -90,11 +91,11 @@ class Field implements JsonSerializable
      */
     public function sortable(?Sort $class = null): Field
     {
-        $this->sortable         = true;
+        $this->sortable = true;
         $this->sortableStrategy = is_null($class) ? new BasicSort() : $class;
+
         return $this;
     }
-
 
     /**
      * @param  bool  $nullable
@@ -104,6 +105,7 @@ class Field implements JsonSerializable
     public function nullable(): Field
     {
         $this->nullable = true;
+
         return $this;
     }
 
@@ -116,6 +118,7 @@ class Field implements JsonSerializable
     public function visible(bool $bool): Field
     {
         $this->visible = $bool;
+
         return $this;
     }
 
@@ -125,6 +128,7 @@ class Field implements JsonSerializable
     public function searchable(): Field
     {
         $this->searchable = true;
+
         return $this;
     }
 
@@ -137,15 +141,14 @@ class Field implements JsonSerializable
     public function jsonSerialize()
     {
         return array_merge([
-            'component'  => $this->component,
-            'attribute'  => $this->attribute,
-            'name'       => $this->name,
-            'nullable'   => $this->nullable,
-            'sortable'   => $this->sortable,
-            'visible'    => $this->visible,
+            'component' => $this->component,
+            'attribute' => $this->attribute,
+            'name' => $this->name,
+            'nullable' => $this->nullable,
+            'sortable' => $this->sortable,
+            'visible' => $this->visible,
             'searchable' => $this->searchable,
-            'value'      => is_null($this->value) ? $this->defaultValue : $this->value,
+            'value' => is_null($this->value) ? $this->defaultValue : $this->value,
         ], $this->meta());
     }
-
 }

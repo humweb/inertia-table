@@ -22,6 +22,7 @@ class SelectFilter extends Filter
     public function multiple(): SelectFilter
     {
         $this->multiple = true;
+
         return $this;
     }
 
@@ -29,8 +30,7 @@ class SelectFilter extends Filter
     {
         if ($this->multiple) {
             $query->whereIn($this->field, $value);
-        }
-        else {
+        } else {
             $query->where($this->field, $value);
         }
     }
@@ -38,8 +38,7 @@ class SelectFilter extends Filter
     public function jsonSerialize()
     {
         return array_merge(parent::jsonSerialize(), [
-            'multiple' => $this->multiple
+            'multiple' => $this->multiple,
         ]);
     }
-
 }

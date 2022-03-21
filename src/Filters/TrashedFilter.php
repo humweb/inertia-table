@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 
 class TrashedFilter extends SelectFilter
 {
-
     public string $label = 'Trashed';
 
     public array $options = [
