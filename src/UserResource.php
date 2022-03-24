@@ -16,9 +16,6 @@ class UserResource extends Resource
 {
     protected $model = User::class;
 
-    public FieldCollection $field;
-    public FilterCollection $filters;
-
     public function __construct(Request $request)
     {
         parent::__construct($request);
@@ -28,7 +25,7 @@ class UserResource extends Resource
     {
         return FieldCollection::make([
             ID::make('ID')->sortable()->searchable(),
-            Text::make('Name')->sortable(),
+            Text::make('Name')->sortable()->searchable(),
             Textarea::make('Email')->sortable(),
         ]);
     }

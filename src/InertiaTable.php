@@ -23,19 +23,19 @@ class InertiaTable
     public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->columns = FieldCollection::make([]);
-        $this->filters = FilterCollection::make([]);
+        $this->columns = new FieldCollection;
+        $this->filters = new FilterCollection;
         $this->search = collect();
     }
 
     /**
-     * Disable the global search.
+     * @param  bool  $bool
      *
-     * @return self
+     * @return $this
      */
-    public function disableGlobalSearch(): InertiaTable
+    public function globalSearch(bool $bool): InertiaTable
     {
-        $this->globalSearch = false;
+        $this->globalSearch = $bool;
 
         return $this;
     }
@@ -45,7 +45,7 @@ class InertiaTable
      *
      * @return array
      */
-    public function getQueryBuilderProps(): array
+    public function buildTableProps(): array
     {
         $columns = $this->transformColumns();
         $search = $this->transformSearch();
@@ -69,7 +69,7 @@ class InertiaTable
     {
         $columns = explode(',', $this->request->query('hidden', ''));
 
-        if (empty($columns)) {
+        if ($columns == '') {
             return $this->columns;
         }
 
@@ -89,20 +89,10 @@ class InertiaTable
      */
     private function transformSearch(): Collection
     {
-        $search = $this->search->collect();
-
-        if ($this->globalSearch) {
-            $search->prepend([
-                'key' => 'global',
-                'label' => 'global',
-                'value' => null,
-            ], 'global');
-        }
-
         $requestSearches = $this->request->query('search', []);
 
-        if (empty($requestSearches)) {
-            return $search;
+        if ($this->globalSearch) {
+            $this->searchable('global', 'Search..', Arr::get($requestSearches, 'global'));
         }
 
         $this->columns->filter(fn ($f) => $f->searchable)
@@ -142,7 +132,7 @@ class InertiaTable
      *
      * @return \Inertia\Response
      */
-    public function shareProps(Response $response): Response
+    public function withProps(Response $response): Response
     {
         if ($this->records instanceof LengthAwarePaginator) {
             $paginated = $this->records->toArray();
@@ -150,13 +140,13 @@ class InertiaTable
                 ->with('pagination', Arr::except($paginated, 'data'));
         }
 
-        return $response->with('queryBuilderProps', $this->getQueryBuilderProps());
+        return $response->with('tableProps', $this->buildTableProps());
     }
 
     public function columns(array|FieldCollection $columns = []): InertiaTable
     {
         if (! ($columns instanceof FieldCollection)) {
-            $columns = FieldCollection::make($columns);
+            $columns = new FieldCollection($columns);
         }
 
         $this->columns = $columns;
@@ -193,7 +183,7 @@ class InertiaTable
     public function filters(FilterCollection|array $filters): InertiaTable
     {
         if (is_array($filters)) {
-            $filters = FilterCollection::make($filters);
+            $filters = new FilterCollection($filters);
         }
         $this->filters = $filters;
 

@@ -98,7 +98,6 @@ class Field implements JsonSerializable
     }
 
     /**
-     * @param  bool  $nullable
      *
      * @return Field
      */

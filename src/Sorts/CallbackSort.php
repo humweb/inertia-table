@@ -1,6 +1,6 @@
 <?php
 
-Humweb\Table\Sorts;
+namespace Humweb\Table\Sorts;
 
 use Illuminate\Database\Eloquent\Builder;
 

@@ -2,6 +2,7 @@
 
 namespace Humweb\Table\Filters;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class TextFilter extends Filter
@@ -12,26 +13,28 @@ class TextFilter extends Filter
     public string $component = 'text-filter';
 
     /**
-     * @param  Request  $request
-     * @param           $query
-     * @param           $value
+     * @param  Request       $request
+     * @param  Builder       $query
+     * @param  string|array  $value
      *
-     * @return \Illuminate\Database\Eloquent\Builder|void
+     * @return $this|Filter
      */
-    public function apply(Request $request, $query, $value)
+    public function apply(Request $request, Builder $query, $value)
     {
         $this->value = $value;
         $this->whereFilter($query, $value);
+
+        return $this;
     }
 
     public function jsonSerialize()
     {
         return array_merge([
             'component' => $this->component,
-            'field' => $this->field,
-            'label' => $this->label,
-            'value' => $this->value,
-            'rules' => $this->validationRules,
+            'field'     => $this->field,
+            'label'     => $this->label,
+            'value'     => $this->value,
+            'rules'     => $this->validationRules,
         ], $this->meta());
     }
 }

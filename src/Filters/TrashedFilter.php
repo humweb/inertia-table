@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection ALL */
 
 namespace Humweb\Table\Filters;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class TrashedFilter extends SelectFilter
@@ -13,17 +14,22 @@ class TrashedFilter extends SelectFilter
         'only' => 'Only',
     ];
 
-    /** {@inheritdoc} */
-    public function apply(Request $request, $query, $value)
+    /**
+     * @param  Request  $request
+     * @param  Builder  $query
+     * @param  string   $value
+     *
+     * @return $this|Filter|TrashedFilter|void
+     */
+    public function apply(Request $request, Builder $query, $value)
     {
-        if ($value === 'with') {
+        if ($value === 'with' && method_exists($query, 'withTrashed')) {
             $query->withTrashed();
         }
 
-        if ($value === 'only') {
+        if ($value === 'only' && method_exists($query, 'onlyTrashed')) {
             $query->onlyTrashed();
-        } else {
-            $query->withoutTrashed();
         }
+        return $this;
     }
 }

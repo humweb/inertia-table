@@ -4,6 +4,7 @@ namespace Humweb\Table;
 
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
+use Humweb\Table\Sorts\Sort;
 use Humweb\Table\Traits\Makeable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -82,8 +83,8 @@ abstract class Resource
         $reqSearch = $this->request->get('search');
 
         if ($reqSearch) {
-            $this->fields()->filter(fn ($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
-                if (isset($reqSearch[$field->attribute]) && ! empty($reqSearch[$field->attribute])) {
+            $this->fields()->filter(fn($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
+                if (isset($reqSearch[$field->attribute]) && !empty($reqSearch[$field->attribute])) {
                     $this->whereLike($field->attribute, $reqSearch[$field->attribute]);
                 }
             });
@@ -96,10 +97,10 @@ abstract class Resource
     {
         if ($this->driver == 'pgsql') {
             $field = $field;
-            $like = 'ilike';
+            $like  = 'ilike';
         } else {
             $field = "LOWER('{$field}')";
-            $like = 'like';
+            $like  = 'like';
         }
 
         $this->query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
@@ -108,12 +109,12 @@ abstract class Resource
     /**
      * Add parameters from route
      *
-     * @param $key
-     * @param $value
+     * @param string|array $key
+     * @param string|null $value
      *
-     * @return void
+     * @return $this
      */
-    public function addParameter($key, $value = null): Resource
+    public function addParameter(string|array $key, string $value = null): Resource
     {
         if (is_array($key)) {
             $this->parameters = array_merge($this->parameters, $key);
@@ -131,7 +132,7 @@ abstract class Resource
      */
     public function newQuery(): Resource
     {
-        $this->query = $this->model::query();
+        $this->query  = $this->model::query();
         $this->driver = $this->query->getConnection()->getDriverName();
 
         return $this;
@@ -140,7 +141,7 @@ abstract class Resource
     /**
      * Apply custom filters to query
      *
-     * @return void
+     * @return $this
      */
     protected function applyCustomFilters(): Resource
     {
@@ -194,7 +195,7 @@ abstract class Resource
     public function applySorts(): Resource
     {
         if ($this->request->has('sort')) {
-            $sortField = $this->request->get('sort');
+            $sortField  = $this->request->get('sort');
             $descending = str_starts_with($sortField, '-');
 
             if ($descending) {
@@ -218,7 +219,7 @@ abstract class Resource
      */
     public function applyGlobalFilter(): Resource
     {
-        if (method_exists($this, 'globalFilter') && $this->requestHasGlobalFilter()) {
+        if ($this->hasGlobalFilter() && $this->requestHasGlobalFilter()) {
             $this->globalFilter($this->query, $this->request->get('search')['global']);
         }
 
@@ -230,18 +231,30 @@ abstract class Resource
         return array_key_exists('global', $this->request->get('search', []));
     }
 
+    /**
+     * @return bool
+     */
+    public function hasGlobalFilter()
+    {
+        return method_exists($this, 'globalFilter');
+    }
+
+
     public function toResponse(InertiaTable $table)
     {
-        $fields = $this->fields();
-        $table->columns($fields)
+        $table->columns($this->fields())
             ->filters($this->filters())
-            ->records($this->paginate());
+            ->records($this->paginate())
+            ->globalSearch($this->hasGlobalFilter());
 
         return $table;
     }
 
     abstract public function fields(): FieldCollection;
 
+    /**
+     * @return FilterCollection
+     */
     public function filters()
     {
         return new FilterCollection([]);

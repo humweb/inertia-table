@@ -1,6 +1,6 @@
 <?php
 
-namespace Humweb\InertiaTable\Sorts;
+namespace Humweb\Table\Sorts;
 
 use Illuminate\Database\Eloquent\Builder;
 

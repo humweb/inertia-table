@@ -2,6 +2,7 @@
 
 namespace Humweb\Table\Filters;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class SelectFilter extends Filter
@@ -26,13 +27,22 @@ class SelectFilter extends Filter
         return $this;
     }
 
-    public function apply(Request $request, $query, $value)
+    /**
+     * @param  Request       $request
+     * @param  Builder       $query
+     * @param  string|array  $value
+     *
+     * @return $this|Filter
+     */
+    public function apply(Request $request, Builder $query, $value)
     {
         if ($this->multiple) {
             $query->whereIn($this->field, $value);
         } else {
             $query->where($this->field, $value);
         }
+
+        return $this;
     }
 
     public function jsonSerialize()

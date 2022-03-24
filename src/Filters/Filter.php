@@ -4,8 +4,8 @@ namespace Humweb\Table\Filters;
 
 use Humweb\Table\Traits\Makeable;
 use Humweb\Table\Traits\Metable;
-
 use Humweb\Table\Validation\HasValidationRules;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -60,11 +60,11 @@ abstract class Filter implements JsonSerializable
         $this->field = $field;
         $this->value = $value;
 
-        if (! empty($options)) {
+        if (!empty($options)) {
             $this->options = $options;
         }
 
-        if (! empty($label)) {
+        if (!empty($label)) {
             $this->label = $label;
         }
 
@@ -73,17 +73,6 @@ abstract class Filter implements JsonSerializable
             $this->label = str_replace('_', ' ', Str::title($this->field));
         }
     }
-
-    /**
-     * Apply the filter to the given query.
-     *
-     * @param  \Illuminate\Http\Request               $request
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  mixed                                  $value
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    abstract public function apply(Request $request, $query, $value);
 
     public function whereFilter($query, $value)
     {
@@ -101,10 +90,10 @@ abstract class Filter implements JsonSerializable
 
         if ($query->getConnection()->getDriverName() == 'pgsql') {
             $field = $this->field;
-            $like = 'ilike';
+            $like  = 'ilike';
         } else {
             $field = "LOWER('{$this->field}')";
-            $like = 'like';
+            $like  = 'like';
         }
 
 
@@ -118,29 +107,39 @@ abstract class Filter implements JsonSerializable
     }
 
     /**
-     * @param $method
-     * @param $parameters
+     * Apply the filter to the given query.
      *
-     * @return void
+     * @param  \Illuminate\Http\Request               $request
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed                                  $value
+     *
+     * @return Filter
+     */
+    abstract public function apply(Request $request, Builder $query, $value);
+
+    /**
+     * @param  string  $method
+     * @param  mixed   $parameters
+     *
+     * @return Filter
      */
     public function __call($method, $parameters)
     {
         if (property_exists($this, $method)) {
             $this->$method = $parameters[0] ?? true;
-
-            return $this;
         }
+        return $this;
     }
 
     public function jsonSerialize()
     {
         return array_merge([
             'component' => $this->component,
-            'field' => $this->field,
-            'options' => $this->options,
-            'label' => $this->label,
-            'value' => $this->value,
-            'rules' => $this->rules,
+            'field'     => $this->field,
+            'options'   => $this->options,
+            'label'     => $this->label,
+            'value'     => $this->value,
+            'rules'     => $this->rules,
         ], $this->meta());
     }
 }
