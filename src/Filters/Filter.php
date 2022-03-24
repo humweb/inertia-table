@@ -88,9 +88,12 @@ abstract class Filter implements JsonSerializable
             return;
         }
 
+        $field = $this->field;
+
         if ($query->getConnection()->getDriverName() == 'pgsql') {
-            $field = $this->field;
             $like  = 'ilike';
+        } elseif ($query->getConnection()->getDriverName() == 'sqlite') {
+            $like  = 'like';
         } else {
             $field = "LOWER('{$this->field}')";
             $like  = 'like';

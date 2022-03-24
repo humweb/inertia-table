@@ -5,6 +5,7 @@ namespace Humweb\Table\Tests\Unit;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Filters\SelectFilter;
 use Humweb\Table\Filters\TextFilter;
+use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\TestCase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +58,7 @@ class FilterTest extends TestCase
 
     public function test_it_can_test_apply_filter()
     {
-        $builder = DB::table('users');
+        $builder = User::query();
 
         $filter = SelectFilter::make('colors', 'Colors', [
             'blue' => 'blue',
@@ -67,13 +68,13 @@ class FilterTest extends TestCase
 
         $filter->apply($this->request(), $builder, 'blue');
 
-        $this->assertEquals('select * from "users" where "colors" = ?', $builder->toSql());
+        $this->assertEquals('select * from "test_users" where "colors" = ?', $builder->toSql());
         $this->assertEquals('blue', $builder->getBindings()[0]);
     }
 
     public function test_it_can_test_where_multiple_apply_filter()
     {
-        $builder = DB::table('users');
+        $builder = User::query();
 
         $filter = SelectFilter::make('colors', 'Colors', [
             'blue' => 'blue',
@@ -83,13 +84,13 @@ class FilterTest extends TestCase
 
         $filter->apply($this->request(), $builder, ['blue', 'red']);
 
-        $this->assertEquals('select * from "users" where "colors" in (?, ?)', $builder->toSql());
+        $this->assertEquals('select * from "test_users" where "colors" in (?, ?)', $builder->toSql());
         $this->assertTrue($filter->jsonSerialize()['multiple']);
     }
 
     public function test_it_can_test_where_multiple_filter()
     {
-        $builder = DB::table('users');
+        $builder = User::query();
 
         $filter = SelectFilter::make('colors', 'Colors', [
             'blue' => 'blue',
@@ -99,37 +100,37 @@ class FilterTest extends TestCase
 
         $filter->whereFilter($builder, ['blue', 'red']);
 
-        $this->assertEquals('select * from "users" where "colors" in (?, ?)', $builder->toSql());
+        $this->assertEquals('select * from "test_users" where "colors" in (?, ?)', $builder->toSql());
         $this->assertTrue($filter->jsonSerialize()['multiple']);
     }
 
     public function test_it_can_test_where_exact_filter()
     {
-        $builder = DB::table('users');
+        $builder = User::query();
 
         $filter = TextFilter::make('colors')->exact();
 
         $filter->apply($this->request(), $builder, 'blue');
 
-        $this->assertEquals('select * from "users" where "colors" = ?', $builder->toSql());
+        $this->assertEquals('select * from "test_users" where "colors" = ?', $builder->toSql());
     }
 
     public function test_it_can_test_where_like_starts_with_filter()
     {
-        $builder = DB::table('users');
+        $builder = $builder = User::query();
 
         $filter = TextFilter::make('colors')->startsWith();
 
         $filter->apply($this->request(), $builder, 'blue');
 
 
-        $this->assertEquals('select * from "users" where LOWER(\'colors\') like ?', $builder->toSql());
+        $this->assertEquals('select * from "test_users" where LOWER(\'colors\') like ?', $builder->toSql());
         $this->assertEquals('blue%', $builder->getBindings()[0]);
     }
 
     public function test_it_can_test_where_like_ends_with_filter()
     {
-        $builder = DB::table('users');
+        $builder = User::query();
 
         $filter = TextFilter::make('colors')->endsWith();
 
@@ -140,7 +141,7 @@ class FilterTest extends TestCase
 
     public function test_it_can_test_where_like_full_search_filter()
     {
-        $builder = DB::table('users');
+        $builder = User::query();
 
         $filter = TextFilter::make('colors')->fullSearch();
 

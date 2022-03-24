@@ -77,4 +77,9 @@ class UserResource extends Resource
     {
         return $value();
     }
+
+    public function filterId($value)
+    {
+        $this->query->where('id', $value);
+    }
 }

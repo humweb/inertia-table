@@ -21,9 +21,12 @@ class UserResource extends Resource
         parent::__construct($request);
     }
 
+    /**
+     * @return FieldCollection
+     */
     public function fields(): FieldCollection
     {
-        return FieldCollection::make([
+        return new FieldCollection([
             ID::make('ID')->sortable()->searchable(),
             Text::make('Name')->sortable()->searchable(),
             Textarea::make('Email')->sortable(),
@@ -32,7 +35,7 @@ class UserResource extends Resource
 
     public function filters()
     {
-        return FilterCollection::make([
+        return new FilterCollection([
             TextFilter::make('id')->exact()->rules('numeric'),
             TextFilter::make('name')->rules('string'),
             TextFilter::make('email')->fullSearch()->rules('string'),

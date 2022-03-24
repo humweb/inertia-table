@@ -12,6 +12,16 @@ class FilterCollection extends Collection implements JsonSerializable
 {
     use ValidatesCollection;
 
+    /**
+     * @param array $items
+     *
+     * @return FilterCollection
+     */
+    public static function make($items = []): FilterCollection
+    {
+        return new FilterCollection($items);
+    }
+
     public function apply(Request $request, $query)
     {
         $reqFilters = $request->get('filters');

@@ -12,9 +12,11 @@ trait Makeable
     public static function make(...$arguments)
     {
         if (count($arguments)) {
+            /** @phpstan-ignore-next-line */
             return new static(...$arguments);
         }
 
+        /** @phpstan-ignore-next-line */
         return new static();
     }
 }

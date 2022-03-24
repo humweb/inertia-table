@@ -96,8 +96,9 @@ abstract class Resource
     public function whereLike($field, $value)
     {
         if ($this->driver == 'pgsql') {
-            $field = $field;
             $like  = 'ilike';
+        } elseif ($this->driver == 'sqlite') {
+            $like  = 'like';
         } else {
             $field = "LOWER('{$field}')";
             $like  = 'like';
@@ -143,7 +144,7 @@ abstract class Resource
      *
      * @return $this
      */
-    protected function applyCustomFilters(): Resource
+    public function applyCustomFilters(): Resource
     {
         foreach ($this->parameters as $key => $value) {
             if (method_exists($this, 'filter'.ucfirst($key))) {
@@ -219,7 +220,7 @@ abstract class Resource
      */
     public function applyGlobalFilter(): Resource
     {
-        if ($this->hasGlobalFilter() && $this->requestHasGlobalFilter()) {
+        if (method_exists($this, 'globalFilter') && $this->requestHasGlobalFilter()) {
             $this->globalFilter($this->query, $this->request->get('search')['global']);
         }
 

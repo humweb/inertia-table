@@ -14,11 +14,9 @@ trait HasValidationRules
     public mixed $rules = '';
 
     /**
-     * Set the validation rules for the field.
-     *
      * @param  callable|array|string  $rules
      *
-     * @return HasValidationRules
+     * @return $this
      */
     public function rules(callable|array|string $rules): self
     {

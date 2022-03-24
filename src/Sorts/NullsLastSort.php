@@ -10,6 +10,7 @@ class NullsLastSort implements Sort
     {
         $direction = $descending ? 'DESC' : 'ASC';
 
+        /** @phpstan-ignore-next-line */
         if ($query->getConnection()->getDriverName() == 'pgsql') {
             $query->orderByRaw("{$property} {$direction} NULLS LAST");
         } else {

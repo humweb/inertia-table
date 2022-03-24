@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -51,7 +52,11 @@ class TestCase extends Orchestra
 
     protected function assertQueryLogContains(string $partialSql)
     {
-        $queryLog = collect(DB::getQueryLog())->pluck('query')->implode('|');
+
+        $queryLog = collect(DB::getQueryLog())->map(function($q) {
+            $bindings = collect($q['bindings'])->map(fn($b) => is_numeric($b) ? $b : "'".$b."'")->all();
+            return Str::replaceArray('?', $bindings, $q['query']);
+        })->implode('|');
 
         $this->assertStringContainsString($partialSql, $queryLog);
     }

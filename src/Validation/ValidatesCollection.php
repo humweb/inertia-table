@@ -12,7 +12,7 @@ trait ValidatesCollection
      */
     public function validateFilterInput($input, $itemKey = 'field')
     {
-        validator()->validate($input, $this->getValidationRules($itemKey));
+        return validator()->validate($input, $this->getValidationRules($itemKey));
     }
 
     /**
