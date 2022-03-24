@@ -25,7 +25,7 @@ class InertiaTableTest extends TestCase
             $request->query->set('sort', 'name');
         });
 
-        $props = (new InertiaTable($request))->getQueryBuilderProps();
+        $props = (new InertiaTable($request))->buildTableProps();
 
         $this->assertEquals("name", $props['sort']);
     }
@@ -36,7 +36,7 @@ class InertiaTableTest extends TestCase
         $table = new InertiaTable($this->request());
         $table->columns->push(Text::make('name', 'Name'));
 
-        $props = $table->getQueryBuilderProps();
+        $props = $table->buildTableProps();
 
         Assert::assertArraySubset([
             "columns" => [
@@ -51,7 +51,7 @@ class InertiaTableTest extends TestCase
         $table = new InertiaTable($this->request());
         $table->columns->push(Text::make('name', 'Name')->visible(false));
 
-        $props = $table->getQueryBuilderProps();
+        $props = $table->buildTableProps();
 
         Assert::assertArraySubset([
             "columns" => [
@@ -68,7 +68,7 @@ class InertiaTableTest extends TestCase
             Text::make('Name')->searchable(),
         ]);
 
-        $props = $table->getQueryBuilderProps();
+        $props = $table->buildTableProps();
 
         Assert::assertArraySubset([
             "attribute" => "name",
@@ -92,7 +92,7 @@ class InertiaTableTest extends TestCase
         ]);
 
 
-        $props = $table->getQueryBuilderProps();
+        $props = $table->buildTableProps();
 
         $this->assertEquals('foobar', $props['search']['name']['value']);
     }
@@ -112,7 +112,7 @@ class InertiaTableTest extends TestCase
             SelectFilter::make('email', 'Email', ['bar' => 'bar@email.com', 'foo' => 'foo@email.com']),
         ]);
 
-        $props = $table->getQueryBuilderProps();
+        $props = $table->buildTableProps();
 
         $this->assertEquals('foo', $props['filters'][0]->value);
         $this->assertEquals('bar', $props['filters'][1]->value);
@@ -128,7 +128,7 @@ class InertiaTableTest extends TestCase
             'b' => 'Option B',
         ]), ]);
 
-        $props = $table->getQueryBuilderProps();
+        $props = $table->buildTableProps();
 
         Assert::assertArraySubset([
             "filters" => [
