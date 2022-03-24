@@ -1,8 +1,8 @@
 # Table Package
 
 [//]: # ([![Latest Version on Packagist]&#40;https://img.shields.io/packagist/v/humweb/inertia-table.svg?style=flat-square&#41;]&#40;https://packagist.org/packages/humweb/inertia-table&#41;)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/humweb/inertia-table/run-tests?label=tests)](https://github.com/humweb/inertia-table/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/humweb/inertia-table/Check%20&%20fix%20styling?label=code%20style)](https://github.com/humweb/inertia-table/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
+[![run-tests](https://github.com/humweb/inertia-table/actions/workflows/run-tests.yml/badge.svg)](https://github.com/humweb/inertia-table/actions/workflows/run-tests.yml)
+[![Check & fix styling](https://github.com/humweb/inertia-table/actions/workflows/php-cs-fixer.yml/badge.svg)](https://github.com/humweb/inertia-table/actions/workflows/php-cs-fixer.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/humweb/inertia-table.svg?style=flat-square)](https://packagist.org/packages/humweb/inertia-table)
 
 This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
