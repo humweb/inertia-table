@@ -124,7 +124,7 @@ class FilterTest extends TestCase
         $filter->apply($this->request(), $builder, 'blue');
 
 
-        $this->assertEquals('select * from "test_users" where LOWER(\'colors\') like ?', $builder->toSql());
+        $this->assertEquals('select * from "test_users" where colors like ?', $builder->toSql());
         $this->assertEquals('blue%', $builder->getBindings()[0]);
     }
 
