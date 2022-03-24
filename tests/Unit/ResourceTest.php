@@ -2,6 +2,7 @@
 
 namespace Humweb\Table\Tests\Unit;
 
+use Humweb\Table\InertiaTable;
 use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\Models\UserResource;
 use Humweb\Table\Tests\TestCase;
@@ -19,6 +20,25 @@ class ResourceTest extends TestCase
         User::factory()->create(['name' => 'foobar']);
         User::factory(10)->create();
         $this->resource = UserResource::make($this->request());
+    }
+
+    /**
+     * @return void
+     */
+    public function test_it_can_build_response()
+    {
+        $table = new InertiaTable($this->request());
+        $this->resource->toResponse($table);
+        $this->assertEquals('id', $table->columns[0]->attribute);
+        $this->assertEquals('name', $table->columns[1]->attribute);
+        $this->assertEquals('email', $table->columns[2]->attribute);
+
+        $props = $table->buildTableProps();
+        $this->assertArrayHasKey('sort', $props);
+        $this->assertArrayHasKey('page', $props);
+        $this->assertArrayHasKey('columns', $props);
+        $this->assertArrayHasKey('search', $props);
+        $this->assertArrayHasKey('filters', $props);
     }
 
     /**

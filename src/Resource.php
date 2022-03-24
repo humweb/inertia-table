@@ -83,7 +83,7 @@ abstract class Resource
         $reqSearch = $this->request->get('search');
 
         if ($reqSearch) {
-            $this->fields()->filter(fn($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
+            $this->getFields()->filter(fn($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
                 if (isset($reqSearch[$field->attribute]) && !empty($reqSearch[$field->attribute])) {
                     $this->whereLike($field->attribute, $reqSearch[$field->attribute]);
                 }
@@ -96,9 +96,9 @@ abstract class Resource
     public function whereLike($field, $value)
     {
         if ($this->driver == 'pgsql') {
-            $like  = 'ilike';
+            $like = 'ilike';
         } elseif ($this->driver == 'sqlite') {
-            $like  = 'like';
+            $like = 'like';
         } else {
             $field = "LOWER('{$field}')";
             $like  = 'like';
@@ -110,8 +110,8 @@ abstract class Resource
     /**
      * Add parameters from route
      *
-     * @param string|array $key
-     * @param string|null $value
+     * @param  string|array  $key
+     * @param  string|null   $value
      *
      * @return $this
      */
@@ -162,7 +162,7 @@ abstract class Resource
      */
     protected function applyFilters(): Resource
     {
-        $this->filters()->apply($this->request, $this->query);
+        $this->getFilters()->apply($this->request, $this->query);
 
 
         return $this;
@@ -203,7 +203,7 @@ abstract class Resource
                 $sortField = str_replace('-', '', $sortField);
             }
 
-            $this->fields()->each(function ($field) use ($sortField, $descending) {
+            $this->getFields()->each(function ($field) use ($sortField, $descending) {
                 if ($field->attribute == $sortField && $field->sortable) {
                     ($field->sortableStrategy)($this->query, $descending, $sortField);
                 }
@@ -233,6 +233,8 @@ abstract class Resource
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @return bool
      */
     public function hasGlobalFilter()
@@ -243,8 +245,8 @@ abstract class Resource
 
     public function toResponse(InertiaTable $table)
     {
-        $table->columns($this->fields())
-            ->filters($this->filters())
+        $table->columns($this->getFields())
+            ->filters($this->getFilters())
             ->records($this->paginate())
             ->globalSearch($this->hasGlobalFilter());
 
@@ -254,6 +256,34 @@ abstract class Resource
     abstract public function fields(): FieldCollection;
 
     /**
+     * @return FieldCollection
+     */
+    public function getFields(): FieldCollection
+    {
+        $fields = $this->fields();
+
+        if (is_array($fields)) {
+            return new FieldCollection($fields);
+        }
+
+        return $fields;
+    }
+
+    /**
+     * @return FilterCollection
+     */
+    public function getFilters(): FilterCollection
+    {
+        $filters = $this->filters();
+
+        if (is_array($filters)) {
+            return new FilterCollection($filters);
+        }
+
+        return $filters;
+    }
+
+    /**
      * @return FilterCollection
      */
     public function filters()
@@ -261,11 +291,25 @@ abstract class Resource
         return new FilterCollection([]);
     }
 
+    /**
+     * @param  string  $name
+     * @param  array   $arguments
+     *
+     * @return mixed
+     */
     public function __call(string $name, $arguments)
     {
         return $this->forwardCallTo($this->query, $name, $arguments);
     }
 
+    /**
+     * @param  object  $object
+     * @param  string  $method
+     * @param  array   $parameters
+     *
+     * @codeCoverageIgnore
+     * @return mixed
+     */
     protected function forwardCallTo($object, $method, $parameters)
     {
         return $object->{$method}(...$parameters);
