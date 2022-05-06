@@ -8,7 +8,6 @@ use Humweb\Table\Filters\TextFilter;
 use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\TestCase;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class FilterTest extends TestCase

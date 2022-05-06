@@ -52,9 +52,9 @@ class TestCase extends Orchestra
 
     protected function assertQueryLogContains(string $partialSql)
     {
+        $queryLog = collect(DB::getQueryLog())->map(function ($q) {
+            $bindings = collect($q['bindings'])->map(fn ($b) => is_numeric($b) ? $b : "'".$b."'")->all();
 
-        $queryLog = collect(DB::getQueryLog())->map(function($q) {
-            $bindings = collect($q['bindings'])->map(fn($b) => is_numeric($b) ? $b : "'".$b."'")->all();
             return Str::replaceArray('?', $bindings, $q['query']);
         })->implode('|');
 

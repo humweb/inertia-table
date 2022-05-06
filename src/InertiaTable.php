@@ -23,8 +23,8 @@ class InertiaTable
     public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->columns = new FieldCollection;
-        $this->filters = new FilterCollection;
+        $this->columns = new FieldCollection();
+        $this->filters = new FilterCollection();
         $this->search = collect();
     }
 

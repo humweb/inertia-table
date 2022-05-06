@@ -31,10 +31,10 @@ class TextFilter extends Filter
     {
         return array_merge([
             'component' => $this->component,
-            'field'     => $this->field,
-            'label'     => $this->label,
-            'value'     => $this->value,
-            'rules'     => $this->validationRules,
+            'field' => $this->field,
+            'label' => $this->label,
+            'value' => $this->value,
+            'rules' => $this->validationRules,
         ], $this->meta());
     }
 }

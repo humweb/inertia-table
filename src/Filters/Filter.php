@@ -60,11 +60,11 @@ abstract class Filter implements JsonSerializable
         $this->field = $field;
         $this->value = $value;
 
-        if (!empty($options)) {
+        if (! empty($options)) {
             $this->options = $options;
         }
 
-        if (!empty($label)) {
+        if (! empty($label)) {
             $this->label = $label;
         }
 
@@ -91,12 +91,12 @@ abstract class Filter implements JsonSerializable
         $field = $this->field;
 
         if ($query->getConnection()->getDriverName() == 'pgsql') {
-            $like  = 'ilike';
+            $like = 'ilike';
         } elseif ($query->getConnection()->getDriverName() == 'sqlite') {
-            $like  = 'like';
+            $like = 'like';
         } else {
             $field = "LOWER('{$this->field}')";
-            $like  = 'like';
+            $like = 'like';
         }
 
 
@@ -131,6 +131,7 @@ abstract class Filter implements JsonSerializable
         if (property_exists($this, $method)) {
             $this->$method = $parameters[0] ?? true;
         }
+
         return $this;
     }
 
@@ -138,11 +139,11 @@ abstract class Filter implements JsonSerializable
     {
         return array_merge([
             'component' => $this->component,
-            'field'     => $this->field,
-            'options'   => $this->options,
-            'label'     => $this->label,
-            'value'     => $this->value,
-            'rules'     => $this->rules,
+            'field' => $this->field,
+            'options' => $this->options,
+            'label' => $this->label,
+            'value' => $this->value,
+            'rules' => $this->rules,
         ], $this->meta());
     }
 }

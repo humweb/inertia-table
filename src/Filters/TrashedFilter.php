@@ -1,4 +1,6 @@
-<?php /** @noinspection ALL */
+<?php
+
+/** @noinspection ALL */
 
 namespace Humweb\Table\Filters;
 
@@ -30,6 +32,7 @@ class TrashedFilter extends SelectFilter
         if ($value === 'only' && method_exists($query, 'onlyTrashed')) {
             $query->onlyTrashed();
         }
+
         return $this;
     }
 }
