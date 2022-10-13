@@ -16,6 +16,7 @@ class SelectFilter extends Filter
      * @var bool
      */
     public bool $multiple = false;
+    public bool $whereHas = false;
 
     /**
      * @return SelectFilter
@@ -23,6 +24,13 @@ class SelectFilter extends Filter
     public function multiple(): SelectFilter
     {
         $this->multiple = true;
+
+        return $this;
+    }
+
+    public function whereHas(): SelectFilter
+    {
+        $this->whereHas = true;
 
         return $this;
     }
@@ -36,11 +44,18 @@ class SelectFilter extends Filter
      */
     public function apply(Request $request, Builder $query, $value)
     {
-        if ($this->multiple) {
-            $query->whereIn($this->field, $value);
+        if ($this->whereHas) {
+            $query->whereHas($this->field, function($query) use ($value){
+                $query->where(is_numeric($value) ? 'id' : 'slug', $value);
+            });
         } else {
-            $query->where($this->field, $value);
+            if ($this->multiple) {
+                $query->whereIn($this->field, $value);
+            } else {
+                $query->where($this->field, $value);
+            }
         }
+
 
         return $this;
     }

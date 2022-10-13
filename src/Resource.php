@@ -9,6 +9,7 @@ use Humweb\Table\Traits\Makeable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 abstract class Resource
 {
@@ -43,12 +44,12 @@ abstract class Resource
      */
     protected $model;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, $parameters = [])
     {
         $this->newQuery();
-        $this->request = $request;
-//        $this->parameters = $parameters;
-        $this->filters = new FilterCollection();
+        $this->request    = $request;
+        $this->parameters = $parameters;
+        $this->filters    = new FilterCollection();
     }
 
     /**
@@ -83,8 +84,8 @@ abstract class Resource
         $reqSearch = $this->request->get('search');
 
         if ($reqSearch) {
-            $this->getFields()->filter(fn ($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
-                if (isset($reqSearch[$field->attribute]) && ! empty($reqSearch[$field->attribute])) {
+            $this->getFields()->filter(fn($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
+                if (isset($reqSearch[$field->attribute]) && !empty($reqSearch[$field->attribute])) {
                     $this->whereLike($field->attribute, $reqSearch[$field->attribute]);
                 }
             });
@@ -101,7 +102,7 @@ abstract class Resource
             $like = 'like';
         } else {
             $field = "LOWER('{$field}')";
-            $like = 'like';
+            $like  = 'like';
         }
 
         $this->query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
@@ -133,7 +134,7 @@ abstract class Resource
      */
     public function newQuery(): Resource
     {
-        $this->query = $this->model::query();
+        $this->query  = $this->model::query();
         $this->driver = $this->query->getConnection()->getDriverName();
 
         return $this;
@@ -147,8 +148,9 @@ abstract class Resource
     public function applyCustomFilters(): Resource
     {
         foreach ($this->parameters as $key => $value) {
-            if (method_exists($this, 'filter'.ucfirst($key))) {
-                $this->{'filter'.ucfirst($key)}($value);
+            $method = 'filter'.Str::studly(str_replace('.', '_', $key));
+            if (method_exists($this, $method)) {
+                $this->{$method}($value);
             }
         }
 
@@ -196,7 +198,7 @@ abstract class Resource
     public function applySorts(): Resource
     {
         if ($this->request->has('sort')) {
-            $sortField = $this->request->get('sort');
+            $sortField  = $this->request->get('sort');
             $descending = str_starts_with($sortField, '-');
 
             if ($descending) {
@@ -245,7 +247,7 @@ abstract class Resource
     public function toResponse(InertiaTable $table)
     {
         $table->columns($this->getFields())
-            ->filters($this->getFilters())
+            ->filters($this->getFilters()->toArray())
             ->records($this->paginate())
             ->globalSearch($this->hasGlobalFilter());
 
@@ -278,8 +280,9 @@ abstract class Resource
         if (is_array($filters)) {
             return new FilterCollection($filters);
         }
-
-        return $filters;
+        return $filters->filter(function ($filter) {
+            return !isset($this->parameters[$filter->field]);
+        })->values();
     }
 
     /**
