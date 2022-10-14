@@ -47,9 +47,9 @@ abstract class Resource
     public function __construct(Request $request, $parameters = [])
     {
         $this->newQuery();
-        $this->request    = $request;
+        $this->request = $request;
         $this->parameters = $parameters;
-        $this->filters    = new FilterCollection();
+        $this->filters = new FilterCollection();
     }
 
     /**
@@ -90,8 +90,8 @@ abstract class Resource
         $reqSearch = $this->request->get('search');
 
         if ($reqSearch) {
-            $this->getFields()->filter(fn($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
-                if (isset($reqSearch[$field->attribute]) && !empty($reqSearch[$field->attribute])) {
+            $this->getFields()->filter(fn ($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
+                if (isset($reqSearch[$field->attribute]) && ! empty($reqSearch[$field->attribute])) {
                     $this->whereLike($field->attribute, $reqSearch[$field->attribute]);
                 }
             });
@@ -108,7 +108,7 @@ abstract class Resource
             $like = 'like';
         } else {
             $field = "LOWER('{$field}')";
-            $like  = 'like';
+            $like = 'like';
         }
 
         $this->query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
@@ -140,7 +140,7 @@ abstract class Resource
      */
     public function newQuery(): Resource
     {
-        $this->query  = $this->model::query();
+        $this->query = $this->model::query();
         $this->driver = $this->query->getConnection()->getDriverName();
 
         return $this;
@@ -204,7 +204,7 @@ abstract class Resource
     public function applySorts(): Resource
     {
         if ($this->request->has('sort')) {
-            $sortField  = $this->request->get('sort');
+            $sortField = $this->request->get('sort');
             $descending = str_starts_with($sortField, '-');
 
             if ($descending) {
@@ -286,8 +286,9 @@ abstract class Resource
         if (is_array($filters)) {
             return new FilterCollection($filters);
         }
+
         return $filters->filter(function ($filter) {
-            return !isset($this->parameters[$filter->field]);
+            return ! isset($this->parameters[$filter->field]);
         })->values();
     }
 

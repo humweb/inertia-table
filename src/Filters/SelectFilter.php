@@ -45,7 +45,7 @@ class SelectFilter extends Filter
     public function apply(Request $request, Builder $query, $value)
     {
         if ($this->whereHas) {
-            $query->whereHas($this->field, function($query) use ($value){
+            $query->whereHas($this->field, function ($query) use ($value) {
                 $query->where(is_numeric($value) ? 'id' : 'slug', $value);
             });
         } else {
