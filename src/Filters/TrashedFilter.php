@@ -12,8 +12,8 @@ class TrashedFilter extends SelectFilter
     public string $label = 'Trashed';
 
     public array $options = [
-        'with' => 'With',
-        'only' => 'Only',
+        'with' => 'With Disabled',
+        'only' => 'Only Disabled',
     ];
 
     /**
