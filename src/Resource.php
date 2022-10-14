@@ -66,7 +66,13 @@ abstract class Resource
     {
         $this->buildQuery();
 
-        return $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
+        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
+
+        if (method_exists($this, 'transform')) {
+            $data = $data->through($this->transform());
+        }
+
+        return $data;
     }
 
     public function buildQuery()
