@@ -18,10 +18,12 @@ abstract class Resource
     public array $parameters = [];
 
     protected Request $request;
+
     /**
      * @var FilterCollection
      */
     protected FilterCollection $filters;
+
     /**
      * @var Builder
      */
@@ -38,6 +40,8 @@ abstract class Resource
     public string|Sort $defaultSort = 'id';
 
     public $driver = 'pgsql';
+
+    public $runtimeTransform = null;
 
     /**
      * @var string
@@ -66,9 +70,12 @@ abstract class Resource
     {
         $this->buildQuery();
 
-        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
+        $data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
 
-        if (method_exists($this, 'transform')) {
+        if ($this->runtimeTransform) {
+            $data = $data->through($this->runtimeTransform);
+        }
+        elseif (method_exists($this, 'transform')) {
             $data = $data->through($this->transform());
         }
 
@@ -330,5 +337,15 @@ abstract class Resource
     public function getQuery(): Builder
     {
         return $this->query;
+    }
+
+    /**
+     * @param  callable  $runtimeTransform
+     */
+    public function runtimeTransform(callable $runtimeTransform): Resource
+    {
+        $this->runtimeTransform = $runtimeTransform;
+
+        return $this;
     }
 }
