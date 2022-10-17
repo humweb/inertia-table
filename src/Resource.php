@@ -74,8 +74,7 @@ abstract class Resource
 
         if ($this->runtimeTransform) {
             $data = $data->through($this->runtimeTransform);
-        }
-        elseif (method_exists($this, 'transform')) {
+        } elseif (method_exists($this, 'transform')) {
             $data = $data->through($this->transform());
         }
 
