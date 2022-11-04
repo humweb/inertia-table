@@ -16,7 +16,8 @@ class SelectFilter extends Filter
      * @var bool
      */
     public bool $multiple = false;
-    public bool $whereHas = false;
+
+    public bool|string $whereHas = false;
 
     /**
      * @return SelectFilter
@@ -28,7 +29,7 @@ class SelectFilter extends Filter
         return $this;
     }
 
-    public function whereHas(): SelectFilter
+    public function whereHas($column = true): SelectFilter
     {
         $this->whereHas = true;
 
@@ -44,9 +45,15 @@ class SelectFilter extends Filter
      */
     public function apply(Request $request, Builder $query, $value)
     {
-        if ($this->whereHas) {
+        if (!empty($this->whereHas)) {
             $query->whereHas($this->field, function ($query) use ($value) {
-                $query->where(is_numeric($value) ? 'id' : 'slug', $value);
+                // If we don't specify a field we assume the field is either id or slug
+                if (is_bool($this->whereHas)){
+                    $field = is_numeric($value) ? 'id' : 'slug';
+                } else {
+                    $field = $this->whereHas;
+                }
+                $query->where($field, $value);
             });
         } else {
             if ($this->multiple) {
