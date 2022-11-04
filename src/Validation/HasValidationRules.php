@@ -9,9 +9,9 @@ trait HasValidationRules
 {
     /**
      *
-     * @var mixed
+     * @var array
      */
-    public mixed $rules = '';
+    public array $rules = [];
 
     /**
      * @param  callable|array|string  $rules
@@ -20,7 +20,7 @@ trait HasValidationRules
      */
     public function rules(callable|array|string $rules): self
     {
-        $this->rules = ($rules instanceof Rule || is_string($rules)) ? func_get_args() : $rules;
+        $this->rules = (is_array($rules)) ? $rules : func_get_args();
 
         return $this;
     }
@@ -34,6 +34,6 @@ trait HasValidationRules
      */
     public function getRules(Request $request): array
     {
-        return is_callable($this->rules) ? call_user_func($this->rules, $request) : $this->rules;
+        return is_callable($this->rules[0]) ? call_user_func($this->rules[0], $request) : $this->rules;
     }
 }
