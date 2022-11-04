@@ -3,7 +3,6 @@
 namespace Humweb\Table\Validation;
 
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 trait HasValidationRules
 {

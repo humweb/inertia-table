@@ -349,6 +349,3 @@ abstract class Resource
         return $this;
     }
 }
-
-
-
