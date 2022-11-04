@@ -71,6 +71,7 @@ abstract class Resource
         $this->buildQuery();
 
         $data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
+//        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
 
         if ($this->runtimeTransform) {
             $data = $data->through($this->runtimeTransform);
@@ -349,3 +350,6 @@ abstract class Resource
         return $this;
     }
 }
+
+
+
