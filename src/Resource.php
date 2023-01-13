@@ -261,7 +261,7 @@ abstract class Resource
     {
         $table->columns($this->getFields())
             ->filters($this->getFilters()->toArray())
-            ->records($this->paginate())
+            ->records($this->paginate($this->request->get('perPage', 15)))
             ->globalSearch($this->hasGlobalFilter());
 
         return $table;
