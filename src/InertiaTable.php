@@ -118,8 +118,8 @@ class InertiaTable
         }
 
         return $this->filters->map(function ($filter) use ($requestFilters) {
-            if (array_key_exists($filter['field'], $requestFilters)) {
-                $filter['value'] = $requestFilters[$filter['field']];
+            if (array_key_exists($filter->field, $requestFilters)) {
+                $filter->value = $requestFilters[$filter->field];
             }
 
             return $filter;

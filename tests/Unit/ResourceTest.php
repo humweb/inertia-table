@@ -49,7 +49,7 @@ class ResourceTest extends TestCase
         DB::enableQueryLog();
         $output = $this->resource->paginate();
         $this->assertQueryLogContains('select count(*) as aggregate from "test_users"');
-        $this->assertQueryLogContains('select * from "test_users" order by "id" asc limit 15 offset 0');
+        $this->assertQueryLogContains('order by "id" asc limit 15 offset 0');
     }
 
     /**
@@ -64,14 +64,14 @@ class ResourceTest extends TestCase
             ]);
         }))->paginate();
 
-        $this->assertQueryLogContains('select * from "test_users" where name like \'%foobar%\' order by "id" asc limit 15 offset 0');
+        $this->assertQueryLogContains('where name like \'%foobar%\' order by "id" asc limit 15 offset 0');
 //        $this->assertQueryLogContains('select count(*) as aggregate from "test_users" where LOWER(\'name\') like \'%fsoobar%\'');
     }
 
     /**
      * @return void
      */
-    public function test_it_can_apply_serach_with_pgsql_driver()
+    public function test_it_can_apply_search_with_pgsql_driver()
     {
         DB::enableQueryLog();
         $this->resource = UserResource::make($this->request(function (Request $request) {
@@ -129,7 +129,7 @@ class ResourceTest extends TestCase
 
         $this->resource->paginate();
 
-        $this->assertQueryLogContains('select * from "test_users" order by "name" desc limit 15 offset 0');
+        $this->assertQueryLogContains('order by "name" desc limit 15 offset 0');
     }
 
     /**
@@ -145,14 +145,14 @@ class ResourceTest extends TestCase
 
         $this->resource->paginate();
 
-        $this->assertQueryLogContains('select * from "test_users" order by "name" desc limit 15 offset 0');
+        $this->assertQueryLogContains('order by "name" desc limit 15 offset 0');
 
         $this->resource = UserResource::make($this->request(function (Request $request) {
             $request->query->set('sort', 'name');
         }));
 
         $this->resource->paginate();
-        $this->assertQueryLogContains('select * from "test_users" order by "name" asc limit 15 offset 0');
+        $this->assertQueryLogContains('order by "name" asc limit 15 offset 0');
     }
 
     /**
@@ -170,6 +170,6 @@ class ResourceTest extends TestCase
 
         $this->resource->paginate();
 
-        $this->assertQueryLogContains('select * from "test_users" where ("id" = 1) order by "id" asc limit 15 offset 0');
+        $this->assertQueryLogContains('where ("id" = 1) order by "id" asc limit 15 offset 0');
     }
 }

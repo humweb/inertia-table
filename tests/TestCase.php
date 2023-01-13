@@ -2,6 +2,7 @@
 
 namespace Humweb\Table\Tests;
 
+use Hammerstone\FastPaginate\FastPaginateProvider;
 use Humweb\Table\InertiaTableServiceProvider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,6 +27,7 @@ class TestCase extends Orchestra
     {
         return [
             InertiaTableServiceProvider::class,
+            FastPaginateProvider::class
         ];
     }
 
