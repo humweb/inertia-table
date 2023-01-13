@@ -52,12 +52,12 @@ class InertiaTable
         $filters = $this->transformFilters();
 
         return [
-            'sort'     => $this->request->query('sort'),
-            'page'     => Paginator::resolveCurrentPage(),
-            'perPage'  => $this->request->get('perPage', 15),
-            'columns'  => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search'   => $search->isNotEmpty() ? $search->all() : (object) [],
-            'filters'  => $filters->isNotEmpty() ? $filters->all() : (object) [],
+            'sort'    => $this->request->query('sort'),
+            'page'    => Paginator::resolveCurrentPage(),
+            'perPage' => $this->request->get('perPage', 15),
+            'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
+            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
+            'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
 
