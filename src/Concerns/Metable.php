@@ -1,6 +1,6 @@
 <?php
 
-namespace Humweb\Table\Traits;
+namespace Humweb\Table\Concerns;
 
 trait Metable
 {

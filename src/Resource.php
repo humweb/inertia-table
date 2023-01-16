@@ -2,18 +2,18 @@
 
 namespace Humweb\Table;
 
+use Humweb\Table\Concerns\HasResourceQueries;
+use Humweb\Table\Concerns\Makeable;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
-use Humweb\Table\Sorts\Sort;
-use Humweb\Table\Traits\Makeable;
+use Humweb\Table\Sorts\Sort;;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 abstract class Resource
 {
     use Makeable;
+    use HasResourceQueries;
 
     public array $parameters = [];
 
@@ -24,15 +24,6 @@ abstract class Resource
      */
     protected FilterCollection $filters;
 
-    /**
-     * @var Builder
-     */
-    protected Builder $query;
-
-    /**
-     * @var array
-     */
-    protected array $sorts;
 
     /**
      * @var string|Sort
@@ -51,75 +42,11 @@ abstract class Resource
     public function __construct(Request $request, $parameters = [])
     {
         $this->newQuery();
-        $this->request = $request;
+        $this->request    = $request;
         $this->parameters = $parameters;
-        $this->filters = new FilterCollection();
+        $this->filters    = new FilterCollection();
     }
 
-    /**
-     * Query and paginate data from database
-     *
-     * @param  int     $perPage
-     * @param  array   $columns
-     * @param  string  $pageName
-     * @param  int     $page
-     *
-     * @return mixed
-     */
-    public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
-    {
-        $this->buildQuery();
-
-        $data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
-//        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
-
-        if ($this->runtimeTransform) {
-            $data = $data->through($this->runtimeTransform);
-        } elseif (method_exists($this, 'transform')) {
-            $data = $data->through($this->transform());
-        }
-
-        return $data;
-    }
-
-    public function buildQuery()
-    {
-        $this->applyDefaultSort()
-            ->applySorts()
-            ->applyGlobalFilter()
-            ->applyCustomFilters()
-            ->applySearch()
-            ->applyFilters();
-    }
-
-    public function applySearch()
-    {
-        $reqSearch = $this->request->get('search');
-
-        if ($reqSearch) {
-            $this->getFields()->filter(fn ($f) => $f->searchable)->each(function ($field) use ($reqSearch) {
-                if (isset($reqSearch[$field->attribute]) && ! empty($reqSearch[$field->attribute])) {
-                    $this->whereLike($field->attribute, $reqSearch[$field->attribute]);
-                }
-            });
-        }
-
-        return $this;
-    }
-
-    public function whereLike($field, $value)
-    {
-        if ($this->driver == 'pgsql') {
-            $like = 'ilike';
-        } elseif ($this->driver == 'sqlite') {
-            $like = 'like';
-        } else {
-            $field = "LOWER('{$field}')";
-            $like = 'like';
-        }
-
-        $this->query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
-    }
 
     /**
      * Add parameters from route
@@ -140,122 +67,6 @@ abstract class Resource
         return $this;
     }
 
-    /**
-     * Create new query builder instance
-     *
-     * @return $this
-     */
-    public function newQuery(): Resource
-    {
-        $this->query = $this->model::query();
-        $this->driver = $this->query->getConnection()->getDriverName();
-
-        return $this;
-    }
-
-    /**
-     * Apply custom filters to query
-     *
-     * @return $this
-     */
-    public function applyCustomFilters(): Resource
-    {
-        foreach ($this->parameters as $key => $value) {
-            $method = 'filter'.Str::studly(str_replace('.', '_', $key));
-            if (method_exists($this, $method)) {
-                $this->{$method}($value);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add allowed filters to query builder
-     *
-     * @return $this
-     */
-    protected function applyFilters(): Resource
-    {
-        $this->getFilters()->apply($this->request, $this->query);
-
-
-        return $this;
-    }
-
-    /**
-     * Apply default sort to builder
-     *
-     * @return $this
-     */
-    public function applyDefaultSort(): Resource
-    {
-        if ($this->request->has('sort')) {
-            return $this;
-        }
-
-        if (method_exists($this, 'defaultSort')) {
-            $this->defaultSort($this->query);
-        } elseif (is_string($this->defaultSort)) {
-            $this->request->merge(['sort' => $this->defaultSort]);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Apply default sort to builder
-     *
-     * @return $this
-     */
-    public function applySorts(): Resource
-    {
-        if ($this->request->has('sort')) {
-            $sortField = $this->request->get('sort');
-            $descending = str_starts_with($sortField, '-');
-
-            if ($descending) {
-                $sortField = str_replace('-', '', $sortField);
-            }
-
-            $this->getFields()->each(function ($field) use ($sortField, $descending) {
-                if ($field->attribute == $sortField && $field->sortable) {
-                    ($field->sortableStrategy)($this->query, $descending, $sortField);
-                }
-            });
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add global filter if it exists
-     *
-     * @return $this
-     */
-    public function applyGlobalFilter(): Resource
-    {
-        if (method_exists($this, 'globalFilter') && $this->requestHasGlobalFilter()) {
-            $this->globalFilter($this->query, $this->request->get('search')['global']);
-        }
-
-        return $this;
-    }
-
-    public function requestHasGlobalFilter()
-    {
-        return array_key_exists('global', $this->request->get('search', []));
-    }
-
-    /**
-     * @codeCoverageIgnore
-     *
-     * @return bool
-     */
-    public function hasGlobalFilter()
-    {
-        return method_exists($this, 'globalFilter');
-    }
 
     public function toResponse(InertiaTable $table)
     {
@@ -295,7 +106,7 @@ abstract class Resource
         }
 
         return $filters->filter(function ($filter) {
-            return ! isset($this->parameters[$filter->field]);
+            return !isset($this->parameters[$filter->field]);
         })->values();
     }
 

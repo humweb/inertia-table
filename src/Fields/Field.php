@@ -2,10 +2,10 @@
 
 namespace Humweb\Table\Fields;
 
+use Humweb\Table\Concerns\Makeable;
+use Humweb\Table\Concerns\Metable;
 use Humweb\Table\Sorts\BasicSort;
 use Humweb\Table\Sorts\Sort;
-use Humweb\Table\Traits\Makeable;
-use Humweb\Table\Traits\Metable;
 use Humweb\Table\Validation\HasValidationRules;
 use Illuminate\Support\Str;
 use JsonSerializable;
@@ -91,7 +91,7 @@ class Field implements JsonSerializable
      */
     public function sortable(?Sort $class = null): Field
     {
-        $this->sortable = true;
+        $this->sortable         = true;
         $this->sortableStrategy = is_null($class) ? new BasicSort() : $class;
 
         return $this;
@@ -140,14 +140,14 @@ class Field implements JsonSerializable
     public function jsonSerialize()
     {
         return array_merge([
-            'component' => $this->component,
-            'attribute' => $this->attribute,
-            'name' => $this->name,
-            'nullable' => $this->nullable,
-            'sortable' => $this->sortable,
-            'visible' => $this->visible,
+            'component'  => $this->component,
+            'attribute'  => $this->attribute,
+            'name'       => $this->name,
+            'nullable'   => $this->nullable,
+            'sortable'   => $this->sortable,
+            'visible'    => $this->visible,
             'searchable' => $this->searchable,
-            'value' => is_null($this->value) ? $this->defaultValue : $this->value,
+            'value'      => is_null($this->value) ? $this->defaultValue : $this->value,
         ], $this->meta());
     }
 }

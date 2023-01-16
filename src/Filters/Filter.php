@@ -2,8 +2,8 @@
 
 namespace Humweb\Table\Filters;
 
-use Humweb\Table\Traits\Makeable;
-use Humweb\Table\Traits\Metable;
+use Humweb\Table\Concerns\Makeable;
+use Humweb\Table\Concerns\Metable;
 use Humweb\Table\Validation\HasValidationRules;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
