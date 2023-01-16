@@ -8,7 +8,6 @@ use Illuminate\Support\Str;
 
 trait HasResourceQueries
 {
-
     /**
      * @var Builder
      */
@@ -19,13 +18,12 @@ trait HasResourceQueries
      */
     protected array $sorts;
 
-
     public function getSelectData()
     {
         return $this->query->get($this->title, 'id')
-            ->map(fn($row) => [
-                'id'    => $row->id,
-                'label' => $row->{$this->title}
+            ->map(fn ($row) => [
+                'id' => $row->id,
+                'label' => $row->{$this->title},
             ]);
     }
 
@@ -54,7 +52,6 @@ trait HasResourceQueries
         return $data;
     }
 
-
     public function buildQuery()
     {
         $this->applyDefaultSort()
@@ -71,8 +68,8 @@ trait HasResourceQueries
         $searchParams = $this->request->get('search');
 
         if ($searchParams) {
-            $this->getFields()->filter(fn($fld) => $fld->searchable)->each(function ($field) use ($searchParams) {
-                if (isset($searchParams[$field->attribute]) && !empty($searchParams[$field->attribute])) {
+            $this->getFields()->filter(fn ($fld) => $fld->searchable)->each(function ($field) use ($searchParams) {
+                if (isset($searchParams[$field->attribute]) && ! empty($searchParams[$field->attribute])) {
                     $this->whereLike($field->attribute, $searchParams[$field->attribute]);
                 }
             });
@@ -89,12 +86,11 @@ trait HasResourceQueries
             $like = 'like';
         } else {
             $field = "LOWER('{$field}')";
-            $like  = 'like';
+            $like = 'like';
         }
 
         $this->query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
     }
-
 
     /**
      * Create new query builder instance
@@ -103,7 +99,7 @@ trait HasResourceQueries
      */
     public function newQuery(): static
     {
-        $this->query  = $this->model::query();
+        $this->query = $this->model::query();
         $this->driver = $this->query->getConnection()->getDriverName();
 
         return $this;
@@ -116,7 +112,7 @@ trait HasResourceQueries
      */
     public function applyEagerLoads()
     {
-        if (!empty($this->with)) {
+        if (! empty($this->with)) {
             $this->query->with($this->with);
         }
 
@@ -181,7 +177,7 @@ trait HasResourceQueries
     public function applySorts(): static
     {
         if ($this->request->has('sort')) {
-            $sortField  = $this->request->get('sort');
+            $sortField = $this->request->get('sort');
             $descending = str_starts_with($sortField, '-');
 
             if ($descending) {
