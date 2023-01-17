@@ -4,14 +4,10 @@ namespace Humweb\Table\Tests\Unit;
 
 use Humweb\Table\Filters\SelectFilter;
 use Humweb\Table\Tests\TestCase;
-use Illuminate\Database\Connection;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 
 class SelectFilterTest extends TestCase
 {
-
-
     public function test_it_can_build_validation_rules()
     {
         $filter = SelectFilter::make('email', 'Email', [1,2,3]);
@@ -39,4 +35,3 @@ class SelectFilterTest extends TestCase
         $filter->apply($request, $mockedBuilder, 'foo');
     }
 }
-

@@ -25,7 +25,6 @@ class TrashedFilter extends SelectFilter
      */
     public function apply(Request $request, Builder $query, $value)
     {
-
         if ($value === 'with' && method_exists($query, 'withTrashed')) {
             $query->withTrashed();
         }
