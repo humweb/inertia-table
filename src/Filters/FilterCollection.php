@@ -19,7 +19,7 @@ class FilterCollection extends Collection implements JsonSerializable
      */
     public static function make($items = []): FilterCollection
     {
-        return new FilterCollection($items);
+        return new static($items);
     }
 
     public function apply(Request $request, $query)
