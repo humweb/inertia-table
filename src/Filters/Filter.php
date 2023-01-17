@@ -20,7 +20,7 @@ abstract class Filter implements JsonSerializable
     /**
      * @var string
      */
-    public string $component;
+    public string $component = 'text-filter';
 
     /**
      * @var string
@@ -41,8 +41,6 @@ abstract class Filter implements JsonSerializable
      * @var string
      */
     public string $label;
-
-    public $validationRules;
 
     public bool $startsWith = false;
     public bool $endsWith = false;
@@ -135,7 +133,7 @@ abstract class Filter implements JsonSerializable
         return $this;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return array_merge([
             'component' => $this->component,
