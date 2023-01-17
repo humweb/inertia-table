@@ -27,14 +27,14 @@ class TextFilter extends Filter
         return $this;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return array_merge([
             'component' => $this->component,
             'field' => $this->field,
             'label' => $this->label,
             'value' => $this->value,
-            'rules' => $this->validationRules,
+            'rules' => $this->rules,
         ], $this->meta());
     }
 }
