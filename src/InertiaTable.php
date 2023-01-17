@@ -47,7 +47,7 @@ class InertiaTable
      */
     public function buildTableProps(): array
     {
-        $columns = $this->transformColumns();
+        $columns = $this->flagVisibility();
         $search = $this->transformSearch();
         $filters = $this->transformFilters();
 
@@ -66,7 +66,7 @@ class InertiaTable
      *
      * @return \Illuminate\Support\Collection
      */
-    private function transformColumns(): Collection
+    private function flagVisibility(): Collection
     {
         $columns = explode(',', $this->request->query('hidden', ''));
 
