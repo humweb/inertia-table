@@ -80,6 +80,12 @@ trait HasResourceQueries
 
     public function whereLike($field, $value)
     {
+
+        if (is_numeric($value)) {
+            $this->query->where(DB::raw($field), $value);
+            return $this;
+        }
+        
         if ($this->driver == 'pgsql') {
             $like = 'ilike';
         } elseif ($this->driver == 'sqlite') {
