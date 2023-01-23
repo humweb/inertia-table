@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 
 class UserResource extends Resource
 {
-    protected $model = User::class;
+    protected string $model = User::class;
 
     public function __construct(Request $request)
     {
