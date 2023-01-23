@@ -22,17 +22,18 @@ class FieldCollection extends Collection implements JsonSerializable
 
     public function applyTransform($records)
     {
-        $transformableFields = $this->filter(fn($field) => $field->hasTransform());
+        $transformableFields = $this->filter(fn ($field) => $field->hasTransform());
         if ($transformableFields->isEmpty()) {
             return $records;
         }
 
 
-       return $records->through(function($record) use ($transformableFields) {
-           $record = $record->toArray();
+        return $records->through(function ($record) use ($transformableFields) {
+            $record = $record->toArray();
             foreach ($transformableFields as $field) {
                 Arr::set($record, $field->attribute, $field->transform(Arr::get($record, $field->attribute)));
             }
+
             return $record;
         });
     }

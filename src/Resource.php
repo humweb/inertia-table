@@ -44,9 +44,9 @@ abstract class Resource
     public function __construct(Request $request, $parameters = [])
     {
         $this->newQuery();
-        $this->request    = $request;
+        $this->request = $request;
         $this->parameters = $parameters;
-        $this->filters    = new FilterCollection();
+        $this->filters = new FilterCollection();
     }
 
     /**
@@ -106,7 +106,7 @@ abstract class Resource
         }
 
         return $filters->filter(function ($filter) {
-            return !isset($this->parameters[$filter->field]);
+            return ! isset($this->parameters[$filter->field]);
         })->values();
     }
 

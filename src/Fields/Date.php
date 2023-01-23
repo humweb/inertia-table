@@ -13,7 +13,6 @@ class Date extends Field
 
     public string $dateFormat = 'Y-m-d';
 
-
     public function dateFormat(string $format): static
     {
         $this->dateFormat = $format;

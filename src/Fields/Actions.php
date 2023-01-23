@@ -2,7 +2,6 @@
 
 namespace Humweb\Table\Fields;
 
-
 class Actions extends Field
 {
     /**
