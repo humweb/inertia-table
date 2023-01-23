@@ -85,13 +85,7 @@ abstract class Resource
      */
     public function getFields(): FieldCollection
     {
-        $fields = $this->fields();
-
-        if (is_array($fields)) {
-            return new FieldCollection($fields);
-        }
-
-        return $fields;
+        return $this->fields();
     }
 
     /**
@@ -99,23 +93,15 @@ abstract class Resource
      */
     public function getFilters(): FilterCollection
     {
-        $filters = $this->filters();
 
-        if (is_array($filters)) {
-            return new FilterCollection($filters);
-        }
-
-        return $filters->filter(function ($filter) {
+        return $this->filters()->filter(function ($filter) {
             return ! isset($this->parameters[$filter->field]);
         })->values();
     }
 
-    /**
-     * @return FilterCollection
-     */
     public function filters(): FilterCollection
     {
-        return new FilterCollection([]);
+        return new FilterCollection();
     }
 
     /**

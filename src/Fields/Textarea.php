@@ -34,8 +34,10 @@ class Textarea extends Field
     /**
      * Prepare the element for JSON serialization.
      *
-     * @return array
+     * @return mixed
+     *
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return array_merge(parent::jsonSerialize(), [
