@@ -15,6 +15,8 @@ abstract class Resource
     use Makeable;
     use HasResourceQueries;
 
+    public string $title;
+
     public array $parameters = [];
 
     protected Request $request;
@@ -32,12 +34,12 @@ abstract class Resource
 
     public $driver = 'pgsql';
 
-    public $runtimeTransform = null;
+    public mixed $runtimeTransform = null;
 
     /**
      * @var string
      */
-    protected $model;
+    protected string $model;
 
     public function __construct(Request $request, $parameters = [])
     {
@@ -53,9 +55,9 @@ abstract class Resource
      * @param  string|array  $key
      * @param  string|null   $value
      *
-     * @return $this
+     * @return static
      */
-    public function addParameter(string|array $key, string $value = null): Resource
+    public function addParameter(string|array $key, string $value = null): static
     {
         if (is_array($key)) {
             $this->parameters = array_merge($this->parameters, $key);
@@ -111,7 +113,7 @@ abstract class Resource
     /**
      * @return FilterCollection
      */
-    public function filters()
+    public function filters(): FilterCollection
     {
         return new FilterCollection([]);
     }
@@ -150,8 +152,10 @@ abstract class Resource
 
     /**
      * @param  callable  $runtimeTransform
+     *
+     * @return static
      */
-    public function runtimeTransform(callable $runtimeTransform): Resource
+    public function runtimeTransform(callable $runtimeTransform): static
     {
         $this->runtimeTransform = $runtimeTransform;
 

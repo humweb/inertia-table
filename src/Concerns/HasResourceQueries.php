@@ -20,7 +20,7 @@ trait HasResourceQueries
 
     public function getSelectData()
     {
-        return $this->query->get($this->title, 'id')
+        return $this->query->get(['title', 'id'])
             ->map(fn ($row) => [
                 'id' => $row->id,
                 'label' => $row->{$this->title},
@@ -43,11 +43,13 @@ trait HasResourceQueries
 
         $data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
 
-        if ($this->runtimeTransform) {
-            $data = $data->through($this->runtimeTransform);
-        } elseif (method_exists($this, 'transform')) {
-            $data = $data->through($this->transform());
-        }
+        $data = $this->getFields()->applyTransform($data);
+
+//        if ($this->runtimeTransform) {
+//            $data = $data->through($this->runtimeTransform);
+//        } elseif (method_exists($this, 'transform')) {
+//            $data = $data->through($this->transform());
+//        }
 
         return $data;
     }
