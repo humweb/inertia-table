@@ -33,7 +33,7 @@ class UserResource extends Resource
         ]);
     }
 
-    public function filters()
+    public function filters(): FilterCollection
     {
         return new FilterCollection([
             TextFilter::make('id')->exact()->rules('numeric'),
