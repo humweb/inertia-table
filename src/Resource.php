@@ -93,7 +93,6 @@ abstract class Resource
      */
     public function getFilters(): FilterCollection
     {
-
         return $this->filters()->filter(function ($filter) {
             return ! isset($this->parameters[$filter->field]);
         })->values();
