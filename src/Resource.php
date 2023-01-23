@@ -7,8 +7,6 @@ use Humweb\Table\Concerns\Makeable;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Sorts\Sort;
-
-;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -44,9 +42,9 @@ abstract class Resource
     public function __construct(Request $request, $parameters = [])
     {
         $this->newQuery();
-        $this->request = $request;
+        $this->request    = $request;
         $this->parameters = $parameters;
-        $this->filters = new FilterCollection();
+        $this->filters    = new FilterCollection();
     }
 
     /**
@@ -106,7 +104,7 @@ abstract class Resource
         }
 
         return $filters->filter(function ($filter) {
-            return ! isset($this->parameters[$filter->field]);
+            return !isset($this->parameters[$filter->field]);
         })->values();
     }
 

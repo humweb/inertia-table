@@ -4,6 +4,7 @@ namespace Humweb\Table\Fields;
 
 use Humweb\Table\Concerns\Makeable;
 use Humweb\Table\Concerns\Metable;
+use Humweb\Table\Concerns\Transformable;
 use Humweb\Table\Sorts\BasicSort;
 use Humweb\Table\Sorts\Sort;
 use Humweb\Table\Validation\HasValidationRules;
@@ -15,6 +16,7 @@ class Field implements JsonSerializable
     use Makeable;
     use Metable;
     use HasValidationRules;
+    use Transformable;
 
     /**
      * @var string
