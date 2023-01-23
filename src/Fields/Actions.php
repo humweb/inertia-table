@@ -27,6 +27,7 @@ class Actions extends Field
     public function actions(array $actions)
     {
         $this->meta['actions'] = $actions;
+
         return $this;
     }
 }
