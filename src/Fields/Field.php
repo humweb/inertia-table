@@ -56,6 +56,8 @@ class Field implements JsonSerializable
      */
     public bool $nullable = false;
 
+    public bool $visibility = true;
+
 
     /**
      * @var bool|Sort
@@ -110,6 +112,19 @@ class Field implements JsonSerializable
         return $this;
     }
 
+
+    /**
+     * @param  bool  $visibility
+     *
+     * @return Field
+     */
+    public function visibility(bool $visibility): Field
+    {
+        $this->visibility = $visibility;
+        return $this;
+    }
+
+
     /**
      *
      * @param  bool  $bool
@@ -148,8 +163,10 @@ class Field implements JsonSerializable
             'nullable' => $this->nullable,
             'sortable' => $this->sortable,
             'visible' => $this->visible,
+            'visibility' => $this->visibility,
             'searchable' => $this->searchable,
             'value' => is_null($this->value) ? $this->defaultValue : $this->value,
         ], $this->meta());
     }
+
 }
