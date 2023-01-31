@@ -112,7 +112,6 @@ class Field implements JsonSerializable
         return $this;
     }
 
-
     /**
      * @param  bool  $visibility
      *
@@ -121,9 +120,9 @@ class Field implements JsonSerializable
     public function visibility(bool $visibility): Field
     {
         $this->visibility = $visibility;
+
         return $this;
     }
-
 
     /**
      *
@@ -168,5 +167,4 @@ class Field implements JsonSerializable
             'value' => is_null($this->value) ? $this->defaultValue : $this->value,
         ], $this->meta());
     }
-
 }
