@@ -2,6 +2,7 @@
 
 namespace Humweb\Table;
 
+use Humweb\Table\Concerns\ForwardsCalls;
 use Humweb\Table\Concerns\HasResourceQueries;
 use Humweb\Table\Concerns\Makeable;
 use Humweb\Table\Fields\FieldCollection;
@@ -13,9 +14,11 @@ use Illuminate\Http\Request;
 abstract class Resource
 {
     use Makeable;
+    use ForwardsCalls;
     use HasResourceQueries;
 
     public string $title;
+    public string $primaryKey = 'id';
 
     public array $parameters = [];
 
@@ -39,14 +42,15 @@ abstract class Resource
     /**
      * @var string
      */
-    protected string $model;
+    protected $model;
 
     public function __construct(Request $request, $parameters = [])
     {
         $this->newQuery();
-        $this->request = $request;
+
+        $this->request    = $request;
         $this->parameters = $parameters;
-        $this->filters = new FilterCollection();
+        $this->filters    = new FilterCollection();
     }
 
     /**
@@ -71,7 +75,7 @@ abstract class Resource
     public function toResponse(InertiaTable $table)
     {
         $table->columns($this->getFields())
-            ->filters($this->getFilters()->toArray())
+            ->filters($this->getFilters())
             ->records($this->paginate($this->request->get('perPage', 15)))
             ->globalSearch($this->hasGlobalFilter());
 
@@ -93,8 +97,10 @@ abstract class Resource
      */
     public function getFilters(): FilterCollection
     {
+        // If we pass a matching url parameter to the resource
+        // We don't show the filter.
         return $this->filters()->filter(function ($filter) {
-            return ! isset($this->parameters[$filter->field]);
+            return !isset($this->parameters[$filter->field]);
         })->values();
     }
 
@@ -109,22 +115,9 @@ abstract class Resource
      *
      * @return mixed
      */
-    public function __call(string $name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         return $this->forwardCallTo($this->query, $name, $arguments);
-    }
-
-    /**
-     * @param  object  $object
-     * @param  string  $method
-     * @param  array   $parameters
-     *
-     * @codeCoverageIgnore
-     * @return mixed
-     */
-    protected function forwardCallTo($object, $method, $parameters)
-    {
-        return $object->{$method}(...$parameters);
     }
 
     /**
