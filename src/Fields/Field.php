@@ -2,6 +2,7 @@
 
 namespace Humweb\Table\Fields;
 
+use Humweb\Table\Concerns\HasVisibility;
 use Humweb\Table\Concerns\Makeable;
 use Humweb\Table\Concerns\Metable;
 use Humweb\Table\Concerns\Transformable;
@@ -17,6 +18,7 @@ class Field implements JsonSerializable
     use Metable;
     use HasValidationRules;
     use Transformable;
+    use HasVisibility;
 
     /**
      * @var string
@@ -114,6 +116,8 @@ class Field implements JsonSerializable
 
 
     /**
+     * Allows column visibility to be toggled
+     *
      * @param  bool  $visibility
      *
      * @return Field
