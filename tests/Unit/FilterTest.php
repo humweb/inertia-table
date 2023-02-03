@@ -179,19 +179,14 @@ class FilterTest extends TestCase
         $filter->whereFilter($query, 'blue');
         $this->assertEquals('select * from "test_users" where colors::text ilike ?', $query->toSql());
 
+    }
+
+    public function test_it_uses_specific_search_mysql_condition()
+    {
         config()->set('database.default', 'mysql');
         $filter = TextFilter::make('colors')->rules('string');
         $query = User::query();
         $filter->whereFilter($query, 'blue');
-        $this->assertEquals('select * from `test_users` where LOWER(\'colors\') like ?', $query->toSql());
+        $this->assertEquals('select * from `test_users` where LOWER(colors) like ?', $query->toSql());
     }
-
-//    public function test_it_uses_specific_search_mysql_condition()
-//    {
-//        config('database.default', 'mysql');
-//        $filter = TextFilter::make('colors')->rules('string');
-//        $query  = User::query();
-//        $filter->whereFilter($query, 'blue');
-//        $this->assertEquals('select * from "test_users" where LOWER(colors) like ?', $query->toSql());
-//    }
 }
