@@ -25,7 +25,7 @@ class InertiaTable
         $this->request = $request;
         $this->columns = new FieldCollection();
         $this->filters = new FilterCollection();
-        $this->search = collect();
+        $this->search  = collect();
     }
 
     /**
@@ -48,15 +48,15 @@ class InertiaTable
     public function buildTableProps(): array
     {
         $columns = $this->flagVisibility();
-        $search = $this->transformSearch();
+        $search  = $this->transformSearch();
         $filters = $this->transformFilters();
 
         return [
-            'sort' => $this->request->query('sort'),
-            'page' => Paginator::resolveCurrentPage(),
+            'sort'    => $this->request->query('sort'),
+            'page'    => Paginator::resolveCurrentPage(),
             'perPage' => $this->request->get('perPage', 15),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
@@ -96,7 +96,7 @@ class InertiaTable
             $this->searchable('global', 'Search..', Arr::get($requestSearches, 'global'));
         }
 
-        $this->columns->filter(fn ($f) => $f->searchable)
+        $this->columns->filter(fn($f) => $f->searchable)
             ->each(function ($f) use ($requestSearches) {
                 $this->searchable($f->attribute, $f->name, Arr::get($requestSearches, $f->attribute));
             });
@@ -146,7 +146,7 @@ class InertiaTable
 
     public function columns(array|FieldCollection $columns = []): InertiaTable
     {
-        if (! ($columns instanceof FieldCollection)) {
+        if (!($columns instanceof FieldCollection)) {
             $columns = new FieldCollection($columns);
         }
 
@@ -171,10 +171,10 @@ class InertiaTable
             }
         } else {
             $this->search->put($columns, [
-                'key' => $columns,
-                'label' => $label,
-                'value' => $value,
-                'enabled' => ! is_null($value),
+                'key'     => $columns,
+                'label'   => $label,
+                'value'   => $value,
+                'enabled' => !is_null($value),
             ]);
         }
 
