@@ -93,7 +93,7 @@ abstract class Filter implements JsonSerializable
         } elseif ($query->getConnection()->getDriverName() == 'sqlite') {
             $like = 'like';
         } else {
-            $field = "LOWER('{$this->field}')";
+            $field = "LOWER({$this->field})";
             $like = 'like';
         }
 
