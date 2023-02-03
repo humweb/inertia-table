@@ -11,7 +11,7 @@ class Actions extends Field
      */
     public string $component = 'action-field';
 
-    public bool $visibility = true;
+    public bool $visibility = false;
 
     /**
      * Create a new field.
