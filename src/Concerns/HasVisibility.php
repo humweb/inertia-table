@@ -26,7 +26,6 @@ trait HasVisibility
      */
     public $showOnUpdate = true;
 
-
     /**
      * @param  string   $context
      * @param  Request  $request
@@ -49,7 +48,6 @@ trait HasVisibility
                 return false;
         }
     }
-
 
     /**
      * @param  bool|callable  $value
@@ -123,5 +121,4 @@ trait HasVisibility
 
         return $this;
     }
-
 }
