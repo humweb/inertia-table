@@ -41,21 +41,23 @@ trait HasResourceQueries
     {
         $this->buildQuery();
 
+//        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
         $data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
 
         $data = $this->getFields()->applyTransform($data);
 
-//        if ($this->runtimeTransform) {
-//            $data = $data->through($this->runtimeTransform);
-//        } elseif (method_exists($this, 'transform')) {
-//            $data = $data->through($this->transform());
-//        }
+        if ($this->runtimeTransform) {
+            $data = $data->through($this->runtimeTransform);
+        } elseif (method_exists($this, 'transform')) {
+            $data = $data->through($this->transform());
+        }
 
         return $data;
     }
 
     public function buildQuery()
     {
+
         $this->applyDefaultSort()
             ->applyEagerLoads()
             ->applySorts()
