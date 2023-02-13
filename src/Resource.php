@@ -48,9 +48,9 @@ abstract class Resource
     {
         $this->newQuery();
 
-        $this->request    = $request;
+        $this->request = $request;
         $this->parameters = $parameters;
-        $this->filters    = new FilterCollection();
+        $this->filters = new FilterCollection();
     }
 
     /**
@@ -100,7 +100,7 @@ abstract class Resource
         // If we pass a matching url parameter to the resource
         // We don't show the filter.
         return $this->filters()->filter(function ($filter) {
-            return !isset($this->parameters[$filter->field]);
+            return ! isset($this->parameters[$filter->field]);
         })->values();
     }
 

@@ -57,7 +57,6 @@ trait HasResourceQueries
 
     public function buildQuery()
     {
-
         $this->applyDefaultSort()
             ->applyEagerLoads()
             ->applySorts()
@@ -84,7 +83,6 @@ trait HasResourceQueries
 
     public function whereLike($field, $value)
     {
-
         if (is_numeric($value)) {
             $this->query->where(DB::raw($field), $value);
 
