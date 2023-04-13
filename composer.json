@@ -17,10 +17,10 @@
     ],
     "require": {
         "php": "^8.0",
-        "illuminate/contracts": "^9.0",
+        "illuminate/contracts": "^10.0",
         "inertiajs/inertia-laravel": "^0.6.3",
-        "spatie/laravel-package-tools": "^1.9.2",
-        "hammerstone/fast-paginate": "^0.1.11"
+        "spatie/laravel-package-tools": "^1.14",
+        "hammerstone/fast-paginate": "^0.1.12"
     },
     "require-dev": {
         "nunomaduro/collision": "^6.0",
