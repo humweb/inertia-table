@@ -65,7 +65,7 @@ class ResourceTest extends TestCase
         }))->paginate();
 
         $this->assertQueryLogContains('where name like \'%foobar%\' order by "id" asc limit 15 offset 0');
-//        $this->assertQueryLogContains('select count(*) as aggregate from "test_users" where LOWER(\'name\') like \'%fsoobar%\'');
+        //        $this->assertQueryLogContains('select count(*) as aggregate from "test_users" where LOWER(\'name\') like \'%fsoobar%\'');
     }
 
     /**

@@ -95,9 +95,9 @@ class FieldsTest extends TestCase
         Assert::assertArraySubset([
             'placeholder' => 'foobar',
         ], $field->jsonSerialize());
-//        $this->assertEquals('title', $field->attribute);
-//
-//        $this->assertEquals('id', ID::make()->attribute);
-//        $this->assertEquals('id', ID::make()->getRuleAttribute());
+        //        $this->assertEquals('title', $field->attribute);
+        //
+        //        $this->assertEquals('id', ID::make()->attribute);
+        //        $this->assertEquals('id', ID::make()->getRuleAttribute());
     }
 }

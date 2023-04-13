@@ -41,7 +41,7 @@ trait HasResourceQueries
     {
         $this->buildQuery();
 
-//        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
+        //        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
         $data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
 
         $data = $this->getFields()->applyTransform($data);
