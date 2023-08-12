@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use JsonSerializable;
 
-class FieldCollection extends Collection implements JsonSerializable, FieldCollectionable
+class FieldCollection extends Collection implements FieldCollectionable
 {
     public function find($attribute)
     {
