@@ -3,11 +3,12 @@
 namespace Humweb\Table;
 
 use App\Models\User;
+use Humweb\Table\Contracts\FieldCollectionable;
+use Humweb\Table\Contracts\FilterCollectionable;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Fields\ID;
 use Humweb\Table\Fields\Text;
 use Humweb\Table\Fields\Textarea;
-use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Filters\TextFilter;
 use Humweb\Table\Filters\TrashedFilter;
 use Illuminate\Http\Request;
@@ -22,9 +23,9 @@ class UserResource extends Resource
     }
 
     /**
-     * @return FieldCollection
+     * @return FieldCollectionable
      */
-    public function fields(): FieldCollection
+    public function fields(): FieldCollectionable
     {
         return new FieldCollection([
             ID::make('ID')->sortable()->searchable(),
@@ -33,7 +34,7 @@ class UserResource extends Resource
         ]);
     }
 
-    public function filters(): FilterCollection
+    public function filters(): FilterCollectionable
     {
         return new FilterCollection([
             TextFilter::make('id')->exact()->rules('numeric'),
