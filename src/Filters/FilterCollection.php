@@ -2,13 +2,13 @@
 
 namespace Humweb\Table\Filters;
 
+use Humweb\Table\Contracts\FilterCollectionable;
 use Humweb\Table\Validation\ValidatesCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-
 use JsonSerializable;
 
-class FilterCollection extends Collection implements JsonSerializable
+class FilterCollection extends Collection implements FilterCollectionable
 {
     use ValidatesCollection;
 

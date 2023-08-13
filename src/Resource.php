@@ -5,6 +5,8 @@ namespace Humweb\Table;
 use Humweb\Table\Concerns\ForwardsCalls;
 use Humweb\Table\Concerns\HasResourceQueries;
 use Humweb\Table\Concerns\Makeable;
+use Humweb\Table\Contracts\FieldCollectionable;
+use Humweb\Table\Contracts\FilterCollectionable;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Sorts\Sort;
@@ -82,12 +84,12 @@ abstract class Resource
         return $table;
     }
 
-    abstract public function fields(): FieldCollection;
+    abstract public function fields(): FieldCollectionable;
 
     /**
      * @return FieldCollection
      */
-    public function getFields(): FieldCollection
+    public function getFields(): FieldCollectionable
     {
         return $this->fields();
     }
@@ -95,7 +97,7 @@ abstract class Resource
     /**
      * @return FilterCollection
      */
-    public function getFilters(): FilterCollection
+    public function getFilters(): FilterCollectionable
     {
         // If we pass a matching url parameter to the resource
         // We don't show the filter.
@@ -104,7 +106,7 @@ abstract class Resource
         })->values();
     }
 
-    public function filters(): FilterCollection
+    public function filters(): FilterCollectionable
     {
         return new FilterCollection();
     }

@@ -2,11 +2,12 @@
 
 namespace Humweb\Table\Fields;
 
+use Humweb\Table\Contracts\FieldCollectionable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use JsonSerializable;
 
-class FieldCollection extends Collection implements JsonSerializable
+class FieldCollection extends Collection implements FieldCollectionable
 {
     public function find($attribute)
     {
