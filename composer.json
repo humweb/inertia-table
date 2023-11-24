@@ -17,10 +17,11 @@
     ],
     "require": {
         "php": "^8.1",
+        "hammerstone/fast-paginate": "^0.1.12",
         "illuminate/contracts": "^10.0",
         "inertiajs/inertia-laravel": "^0.6.3",
-        "spatie/laravel-package-tools": "^1.14",
-        "hammerstone/fast-paginate": "^0.1.12"
+        "kirschbaum-development/eloquent-power-joins": "^3.3",
+        "spatie/laravel-package-tools": "^1.14"
     },
     "require-dev": {
         "nunomaduro/collision": "^7.0",
