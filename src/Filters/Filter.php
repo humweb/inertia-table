@@ -89,7 +89,7 @@ abstract class Filter implements JsonSerializable
      */
     public function applyWhere(Builder $query, $value)
     {
-        if (!empty($this->whereHas)) {
+        if (! empty($this->whereHas)) {
             $query->whereHas($this->whereHas, function ($query) use ($value) {
                 $this->whereFilter($query, $value);
             });
