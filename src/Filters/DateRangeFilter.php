@@ -16,8 +16,8 @@ class DateRangeFilter extends Filter
     public string $dateFormat = '';
 
     /**
-     * @param  Request       $request
-     * @param  Builder       $query
+     * @param  Request  $request
+     * @param  Builder  $query
      * @param  string|array  $value
      *
      * @return $this|Filter
@@ -33,7 +33,13 @@ class DateRangeFilter extends Filter
             Carbon::createFromFormat($this->dateFormat, $value[1])->endOfDay(),
         ];
 
-        $query->whereBetween($this->field, $this->value);
+        if (!empty($this->whereHas)) {
+            $query->whereHas($this->whereHas, function($query){
+                $query->whereBetween($this->field, $this->value);
+            });
+        } else {
+            $query->whereBetween($this->field, $this->value);
+        }
 
         return $this;
     }

@@ -22,7 +22,7 @@ class TextFilter extends Filter
     public function apply(Request $request, Builder $query, $value)
     {
         $this->value = $value;
-        $this->whereFilter($query, $value);
+        $this->applyWhere($query, $value);
 
         return $this;
     }
