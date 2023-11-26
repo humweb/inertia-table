@@ -2,8 +2,6 @@
 
 namespace Humweb\Table\Fields;
 
-use Carbon\Carbon;
-
 class Image extends Field
 {
     /**
