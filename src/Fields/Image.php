@@ -2,8 +2,6 @@
 
 namespace Humweb\Table\Fields;
 
-use Carbon\Carbon;
-
 class Image extends Field
 {
     /**
@@ -27,7 +25,8 @@ class Image extends Field
 
     public function transform($value)
     {
-        $class = !empty($this->meta['class']) ? ' class="'.$this->meta['class'].'"' : '';
+        $class = ! empty($this->meta['class']) ? ' class="'.$this->meta['class'].'"' : '';
+
         return '<img src="'.$this->meta['path'].$value.'"'.$class.' />';
     }
 }
