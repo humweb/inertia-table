@@ -23,7 +23,7 @@ class FieldCollection extends Collection implements FieldCollectionable
 
     public function applyTransform($records)
     {
-        $transformableFields = $this->filter(fn($field) => $field->hasTransform() || $field->hasCallableTransform());
+        $transformableFields = $this->filter(fn ($field) => $field->hasTransform() || $field->hasCallableTransform());
 
         if ($transformableFields->isEmpty()) {
             return $records;
