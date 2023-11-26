@@ -11,27 +11,23 @@ class Image extends Field
      */
     public string $component = 'image-field';
 
-    public string $class = '';
-
-    public string $path = '';
-
     public function class($class = ''): static
     {
-        $this->class = $class;
+        $this->meta['class'] = $class;
 
         return $this;
     }
 
     public function path(string $path): static
     {
-        $this->path = rtrim($path, '/').'/';
+        $this->meta['path'] = rtrim($path, '/').'/';
 
         return $this;
     }
 
     public function transform($value)
     {
-        $class = !empty($this->class) ? ' class="'.$this->class.'"' : '';
-        return '<img src="'.$this->path.$value.'"'.$class.' />';
+        $class = !empty($this->meta['class']) ? ' class="'.$this->meta['class'].'"' : '';
+        return '<img src="'.$this->meta['path'].$value.'"'.$class.' />';
     }
 }
