@@ -2,7 +2,6 @@
 
 namespace Humweb\Table\Fields;
 
-use Carbon\Carbon;
 use Humweb\Table\Concerns\HasClassAttribute;
 
 class Link extends Field
@@ -14,12 +13,11 @@ class Link extends Field
      */
     public string $component = 'link-field';
 
-
     public function route($route, $params): static
     {
         $this->withMeta([
             'route' => $route,
-            'routeParams' => $params
+            'routeParams' => $params,
         ]);
 
         return $this;
