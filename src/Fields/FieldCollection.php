@@ -23,7 +23,7 @@ class FieldCollection extends Collection implements FieldCollectionable
 
     public function applyTransform($records)
     {
-        $transformableFields = $this->filter(fn ($field) => $field->hasTransform());
+        $transformableFields = $this->filter(fn ($field) => $field->hasTransform() || $field->hasCallableTransform());
         if ($transformableFields->isEmpty()) {
             return $records;
         }
@@ -32,7 +32,14 @@ class FieldCollection extends Collection implements FieldCollectionable
         return $records->through(function ($record) use ($transformableFields) {
             $record = $record->toArray();
             foreach ($transformableFields as $field) {
-                Arr::set($record, $field->attribute, $field->transform(Arr::get($record, $field->attribute)));
+                $value = Arr::get($record, $field->attribute);
+                if ($field->hasTransform()) {
+                    $value = $field->transform($value);
+                }
+                elseif($field->hasCallableTransform()) {
+                    $value = ($field->callableTransform)($value);
+                }
+                Arr::set($record, $field->attribute, $value);
             }
 
             return $record;
