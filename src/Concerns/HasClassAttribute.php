@@ -6,7 +6,11 @@ trait HasClassAttribute
 {
     public string $class = '';
 
-    public function class($class = ''): static
+    /**
+     * @param  string  $class
+     * @return $this
+     */
+    public function class(string $class = ''): static
     {
         $this->meta['class'] = $class;
 
