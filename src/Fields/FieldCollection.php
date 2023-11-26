@@ -35,8 +35,7 @@ class FieldCollection extends Collection implements FieldCollectionable
                 $value = Arr::get($record, $field->attribute);
                 if ($field->hasTransform()) {
                     $value = $field->transform($value);
-                }
-                elseif($field->hasCallableTransform()) {
+                } elseif($field->hasCallableTransform()) {
                     $value = ($field->callableTransform)($value);
                 }
                 Arr::set($record, $field->attribute, $value);

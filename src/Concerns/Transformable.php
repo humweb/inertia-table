@@ -4,7 +4,6 @@ namespace Humweb\Table\Concerns;
 
 trait Transformable
 {
-
     /**
      * @var callable|null
      */
@@ -23,6 +22,7 @@ trait Transformable
     public function display(mixed $callableTransform): self
     {
         $this->callableTransform = $callableTransform;
+
         return $this;
     }
 }
