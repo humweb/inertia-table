@@ -24,10 +24,4 @@ class Image extends Field
 
         return $this;
     }
-
-    public function transform($value)
-    {
-        $class = !empty($this->meta['class']) ? ' class="'.$this->meta['class'].'"' : '';
-        return '<img src="'.$this->meta['path'].$value.'"'.$class.' />';
-    }
 }
