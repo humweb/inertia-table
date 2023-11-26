@@ -33,8 +33,8 @@ class DateRangeFilter extends Filter
             Carbon::createFromFormat($this->dateFormat, $value[1])->endOfDay(),
         ];
 
-        if (!empty($this->whereHas)) {
-            $query->whereHas($this->whereHas, function($query){
+        if (! empty($this->whereHas)) {
+            $query->whereHas($this->whereHas, function ($query) {
                 $query->whereBetween($this->field, $this->value);
             });
         } else {
