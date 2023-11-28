@@ -3,6 +3,7 @@
 namespace Humweb\Table\Fields;
 
 use Humweb\Table\Contracts\FieldCollectionable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use JsonSerializable;
@@ -12,6 +13,18 @@ class FieldCollection extends Collection implements FieldCollectionable
     public function find($attribute)
     {
         return $this->firstWhere('attribute', $attribute);
+    }
+
+    public function fill(Model|array $values)
+    {
+        foreach ($this->items as $key => $item) {
+            if ($values instanceof Model && isset($values->{$key})) {
+                $this->items[$key] = $values->{$key};
+            }
+            elseif (is_array($values) && isset($values[$key])) {
+                $this->items[$key] = $values[$key];
+            }
+        }
     }
 
     public function toArray()

@@ -52,7 +52,6 @@ abstract class Resource
 
         $this->request = $request;
         $this->parameters = $parameters;
-        $this->filters = new FilterCollection();
     }
 
     /**
@@ -94,6 +93,15 @@ abstract class Resource
         return $this->fields();
     }
 
+    public function toForm($model = [])
+    {
+        $fields = $this->fields();
+
+        $fields->fill($model);
+
+        return $fields;
+    }
+
     /**
      * @return FilterCollection
      */
@@ -110,6 +118,7 @@ abstract class Resource
     {
         return new FilterCollection();
     }
+
 
     /**
      * @param  string  $name
