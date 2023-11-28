@@ -119,7 +119,6 @@ abstract class Resource
         return new FilterCollection();
     }
 
-
     /**
      * @param  string  $name
      * @param  array   $arguments

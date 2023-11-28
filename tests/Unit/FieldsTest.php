@@ -9,14 +9,12 @@ use Humweb\Table\Fields\Textarea;
 
 use Humweb\Table\Tests\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Testing\Assert;
 
 beforeEach(function () {
 
     $this->fieldCollection = new FieldCollection([
         ID::make()->sortable(),
-        Text::make('Title')->sortable()->display(fn($value) => '('.$value.')'),
+        Text::make('Title')->sortable()->display(fn ($value) => '('.$value.')'),
         Textarea::make('Body')->sortable()->rows(10)->nullable(),
     ]);
 });
@@ -80,4 +78,3 @@ test('can decorate value', function () {
     expect($transformed[0]['title'])->toBe('(foobar)');
 
 });
-

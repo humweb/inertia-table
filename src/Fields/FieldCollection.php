@@ -20,8 +20,7 @@ class FieldCollection extends Collection implements FieldCollectionable
         foreach ($this->items as $key => $item) {
             if ($values instanceof Model && isset($values->{$key})) {
                 $this->items[$key] = $values->{$key};
-            }
-            elseif (is_array($values) && isset($values[$key])) {
+            } elseif (is_array($values) && isset($values[$key])) {
                 $this->items[$key] = $values[$key];
             }
         }
