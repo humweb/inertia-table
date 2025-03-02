@@ -25,6 +25,10 @@ class Actions extends Field
         parent::__construct($name ?? 'Actions', $attribute);
     }
 
+    /**
+     * @param  array  $actions
+     * @return $this
+     */
     public function actions(array $actions)
     {
         $this->meta['actions'] = $actions;

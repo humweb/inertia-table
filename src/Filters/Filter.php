@@ -42,6 +42,7 @@ abstract class Filter implements JsonSerializable
      */
     public string $label;
 
+    public string|bool $whereHas = '';
     public bool $startsWith = false;
     public bool $endsWith = false;
     public bool $fullSearch = false;
@@ -70,6 +71,33 @@ abstract class Filter implements JsonSerializable
         if (empty($this->label)) {
             $this->label = str_replace('_', ' ', Str::title($this->field));
         }
+    }
+
+    public function whereHas($column = true): Filter
+    {
+        $this->whereHas = $column;
+
+        return $this;
+    }
+
+    /**
+     * @param  Request  $request
+     * @param  Builder  $query
+     * @param  string|array  $value
+     *
+     * @return $this|Filter
+     */
+    public function applyWhere(Builder $query, $value)
+    {
+        if (! empty($this->whereHas)) {
+            $query->whereHas($this->whereHas, function ($query) use ($value) {
+                $this->whereFilter($query, $value);
+            });
+        } else {
+            $this->whereFilter($query, $value);
+        }
+
+        return $this;
     }
 
     public function whereFilter($query, $value)

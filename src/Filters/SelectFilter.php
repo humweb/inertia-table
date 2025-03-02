@@ -17,21 +17,12 @@ class SelectFilter extends Filter
      */
     public bool $multiple = false;
 
-    public bool|string $whereHas = false;
-
     /**
      * @return SelectFilter
      */
     public function multiple(): SelectFilter
     {
         $this->multiple = true;
-
-        return $this;
-    }
-
-    public function whereHas($column = true): SelectFilter
-    {
-        $this->whereHas = true;
 
         return $this;
     }

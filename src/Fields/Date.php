@@ -11,8 +11,15 @@ class Date extends Field
      */
     public string $component = 'date-field';
 
+    /**
+     * @var string
+     */
     public string $dateFormat = 'Y-m-d';
 
+    /**
+     * @param  string  $format
+     * @return $this
+     */
     public function dateFormat(string $format): static
     {
         $this->dateFormat = $format;
@@ -20,6 +27,10 @@ class Date extends Field
         return $this;
     }
 
+    /**
+     * @param $value
+     * @return string
+     */
     public function transform($value)
     {
         return Carbon::parse($value)->format($this->dateFormat);
