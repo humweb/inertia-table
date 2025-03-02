@@ -19,7 +19,7 @@
         "php": "^8.2",
         "aaronfrancis/fast-paginate": "^2.0",
         "illuminate/contracts": "^10.0",
-        "inertiajs/inertia-laravel": "^0.6.3",
+        "inertiajs/inertia-laravel": "^2.0",
         "kirschbaum-development/eloquent-power-joins": "^3.3",
         "spatie/laravel-package-tools": "^1.14"
     },
