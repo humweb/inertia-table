@@ -6,7 +6,6 @@ use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Fields\ID;
 use Humweb\Table\Fields\Text;
 use Humweb\Table\Fields\Textarea;
-
 use Humweb\Table\Tests\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 
