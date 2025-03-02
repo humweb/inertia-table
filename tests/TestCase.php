@@ -2,7 +2,7 @@
 
 namespace Humweb\Table\Tests;
 
-use Hammerstone\FastPaginate\FastPaginateProvider;
+use AaronFrancis\FastPaginate\FastPaginateProvider;
 use Humweb\Table\InertiaTableServiceProvider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;

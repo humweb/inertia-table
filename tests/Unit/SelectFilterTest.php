@@ -11,7 +11,7 @@ class SelectFilterTest extends TestCase
     public function test_it_can_build_validation_rules()
     {
         $filter = SelectFilter::make('email', 'Email', [1,2,3]);
-        $this->assertFalse($filter->whereHas);
+        $this->assertEmpty($filter->whereHas);
         $filter->whereHas();
         $this->assertTrue($filter->whereHas);
     }
