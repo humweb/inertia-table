@@ -3,7 +3,7 @@
 namespace Humweb\Table\Filters;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 
 class DateRangeFilter extends Filter

@@ -2,7 +2,7 @@
 
 namespace Humweb\Table\Concerns;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -41,8 +41,8 @@ trait HasResourceQueries
     {
         $this->buildQuery();
 
-        //        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
-        $data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
+        $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
+        //$data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
 
         $data = $this->getFields()->applyTransform($data);
 

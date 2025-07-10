@@ -2,7 +2,7 @@
 
 namespace Humweb\Table\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 
 class SelectFilter extends Filter

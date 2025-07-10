@@ -2,7 +2,7 @@
 
 namespace Humweb\Table\Sorts;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 
 class CallbackSort implements Sort
 {

@@ -5,7 +5,7 @@ namespace Humweb\Table\Filters;
 use Humweb\Table\Concerns\Makeable;
 use Humweb\Table\Concerns\Metable;
 use Humweb\Table\Validation\HasValidationRules;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

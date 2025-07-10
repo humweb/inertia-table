@@ -10,7 +10,7 @@ use Humweb\Table\Contracts\FilterCollectionable;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Sorts\Sort;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 
 abstract class Resource

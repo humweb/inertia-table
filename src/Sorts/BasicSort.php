@@ -2,7 +2,7 @@
 
 namespace Humweb\Table\Sorts;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Str;
 
 class BasicSort implements Sort
