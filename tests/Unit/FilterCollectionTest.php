@@ -5,8 +5,8 @@ namespace Humweb\Table\Tests\Unit;
 use Humweb\Table\Filters\Filter;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Tests\TestCase;
-use Illuminate\Database\Connection;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Connection;
 use Illuminate\Http\Request;
 use Illuminate\Testing\Assert;
 
