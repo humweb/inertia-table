@@ -6,7 +6,7 @@ use Humweb\Table\InertiaTable;
 use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\Models\UserResource;
 use Humweb\Table\Tests\TestCase;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
