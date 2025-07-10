@@ -8,6 +8,7 @@ use Humweb\Table\InertiaTable;
 use Illuminate\Http\Request;
 use Illuminate\Testing\Assert;
 use Orchestra\Testbench\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class InertiaTableTest extends TestCase
 {
@@ -18,7 +19,7 @@ class InertiaTableTest extends TestCase
         return $callback ? tap($request, $callback) : $request;
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_the_sort_from_the_request_query()
     {
         $request = $this->request(function (Request $request) {
@@ -30,7 +31,7 @@ class InertiaTableTest extends TestCase
         $this->assertEquals("name", $props['sort']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_a_column_to_toggle()
     {
         $table = new InertiaTable($this->request());
@@ -45,7 +46,7 @@ class InertiaTableTest extends TestCase
         ], $props);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_a_column_that_is_disabled_by_default()
     {
         $table = new InertiaTable($this->request());
@@ -60,7 +61,7 @@ class InertiaTableTest extends TestCase
         ], $props);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_a_search_row()
     {
         $table = new InertiaTable($this->request());
@@ -78,7 +79,7 @@ class InertiaTableTest extends TestCase
         ], $props['columns'][0]->jsonSerialize());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_the_default_search_values_from_the_request_query()
     {
         $table = new InertiaTable($this->request(function (Request $request) {
@@ -97,7 +98,7 @@ class InertiaTableTest extends TestCase
         $this->assertEquals('foobar', $props['search']['name']['value']);
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_the_default_filter_values_from_the_request_query()
     {
         $table = new InertiaTable($this->request(function (Request $request) {
@@ -118,7 +119,7 @@ class InertiaTableTest extends TestCase
         $this->assertEquals('bar', $props['filters'][1]->value);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_a_filter_with_options()
     {
         $table = new InertiaTable($this->request());
