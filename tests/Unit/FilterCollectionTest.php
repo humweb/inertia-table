@@ -5,7 +5,8 @@ namespace Humweb\Table\Tests\Unit;
 use Humweb\Table\Filters\Filter;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Tests\TestCase;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder as BuilderContract;
 use Illuminate\Database\Connection;
 use Illuminate\Http\Request;
 use Illuminate\Testing\Assert;
@@ -56,7 +57,7 @@ class FilterCollectionTest extends TestCase
 
 class TestFilter extends Filter
 {
-    public function apply(Request $request, Builder $query, $value)
+    public function apply(Request $request, BuilderContract $query, $value)
     {
         $this->value = $value;
         $this->whereFilter($query, $value);
