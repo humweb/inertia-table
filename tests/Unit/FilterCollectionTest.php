@@ -5,9 +5,9 @@ namespace Humweb\Table\Tests\Unit;
 use Humweb\Table\Filters\Filter;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Tests\TestCase;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Database\Query\Builder as BuilderContract;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Testing\Assert;
 
