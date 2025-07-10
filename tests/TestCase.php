@@ -27,7 +27,6 @@ class TestCase extends Orchestra
     {
         return [
             InertiaTableServiceProvider::class,
-            FastPaginateProvider::class,
         ];
     }
 
