@@ -2,6 +2,10 @@
 
 All notable changes to `inertia-table` will be documented in this file.
 
+## Update for laravel 12 - 2025-03-02
+
+**Full Changelog**: https://github.com/humweb/inertia-table/compare/1.5...3.0
+
 ## 1.5 - 2025-03-02
 
 ### What's Changed
