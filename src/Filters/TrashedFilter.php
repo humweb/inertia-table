@@ -39,11 +39,11 @@ class TrashedFilter extends SelectFilter
      */
     public function apply(Request $request, Builder $query, $value)
     {
-        if ($value === 'with' && method_exists($query, 'withTrashed')) {
+        if ($value === 'with' && $query->hasMacro('withTrashed')) {
             $query->withTrashed();
         }
 
-        if ($value === 'only' && method_exists($query, 'onlyTrashed')) {
+        if ($value === 'only' && $query->hasMacro('onlyTrashed')) {
             $query->onlyTrashed();
         }
 
