@@ -36,13 +36,14 @@ class SelectFilter extends Filter
      */
     public function apply(Request $request, Builder $query, $value)
     {
-        if (! empty($this->whereHas)) {
-            $query->whereHas($this->field, function ($query) use ($value) {
-                // If we don't specify a field we assume the field is either id or slug
-                if (is_bool($this->whereHas)) {
+        $relation = $this->relation ?: (empty($this->whereHas) ? null : $this->field);
+        if (! empty($relation)) {
+            $query->whereHas($relation, function ($query) use ($value) {
+                // If we don't specify a relation column we assume id or slug
+                if (is_bool($this->relationColumn)) {
                     $field = is_numeric($value) ? 'id' : 'slug';
                 } else {
-                    $field = $this->whereHas;
+                    $field = $this->relationColumn;
                 }
                 $query->where($field, $value);
             });

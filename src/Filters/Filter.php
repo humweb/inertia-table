@@ -43,6 +43,12 @@ abstract class Filter implements JsonSerializable
     public string $label;
 
     public string|bool $whereHas = '';
+    /**
+     * Preferred relation interface: use $relation and $relationColumn instead of $whereHas.
+     * If $relation is set, it takes precedence over $whereHas.
+     */
+    public ?string $relation = null;
+    public string|bool $relationColumn = true; // true => auto infer id/slug for select-like filters
     public bool $startsWith = false;
     public bool $endsWith = false;
     public bool $fullSearch = false;
@@ -81,6 +87,21 @@ abstract class Filter implements JsonSerializable
     }
 
     /**
+     * Set a relation and optional column to filter against within the relation.
+     *
+     * Examples:
+     * - relation('posts') -> auto-infer column (id/slug) in some filters
+     * - relation('posts', 'id') -> use explicit column
+     */
+    public function relation(string $relation, string|bool $column = true): Filter
+    {
+        $this->relation = $relation;
+        $this->relationColumn = $column;
+
+        return $this;
+    }
+
+    /**
      * @param  Request  $request
      * @param  Builder  $query
      * @param  string|array  $value
@@ -89,8 +110,9 @@ abstract class Filter implements JsonSerializable
      */
     public function applyWhere(Builder $query, $value)
     {
-        if (! empty($this->whereHas)) {
-            $query->whereHas($this->whereHas, function ($query) use ($value) {
+        $relation = $this->relation ?: (empty($this->whereHas) ? null : (is_string($this->whereHas) ? $this->whereHas : null));
+        if (! empty($relation)) {
+            $query->whereHas($relation, function ($query) use ($value) {
                 $this->whereFilter($query, $value);
             });
         } else {

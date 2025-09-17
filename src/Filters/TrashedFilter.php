@@ -12,9 +12,23 @@ class TrashedFilter extends SelectFilter
     public string $label = 'Trashed';
 
     public array $options = [
-        'with' => 'With Disabled',
-        'only' => 'Only Disabled',
+        'with' => 'With Trashed',
+        'only' => 'Only Trashed',
     ];
+
+    /**
+     * @param  string             $field
+     * @param  string             $label
+     * @param  array              $options
+     * @param  string|array|null  $value
+     */
+    public function __construct(string $field, string $label = '', array $options = [], string|array $value = null)
+    {
+        parent::__construct($field, $label, $options, $value);
+
+        // Restrict accepted values to prevent invalid input
+        $this->rules('in:with,only');
+    }
 
     /**
      * @param  Request  $request

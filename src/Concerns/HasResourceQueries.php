@@ -41,6 +41,13 @@ trait HasResourceQueries
     {
         $this->buildQuery();
 
+        $defaultPerPage = (int) config('inertia-table.pagination.default_per_page', 15);
+        $maxPerPage = (int) config('inertia-table.pagination.max_per_page', 100);
+        $perPage = (int) ($perPage ?? $defaultPerPage);
+        if ($perPage > $maxPerPage) {
+            $perPage = $maxPerPage;
+        }
+
         $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
         //$data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
 
@@ -209,9 +216,22 @@ trait HasResourceQueries
      */
     public function applyGlobalFilter(): static
     {
-        if (method_exists($this, 'globalFilter') && $this->requestHasGlobalFilter()) {
-            $this->globalFilter($this->query, $this->request->get('search')['global']);
+        if (! $this->requestHasGlobalFilter()) {
+            return $this;
         }
+
+        $global = $this->request->get('search')['global'];
+
+        if (method_exists($this, 'globalFilter')) {
+            $this->globalFilter($this->query, $global);
+            return $this;
+        }
+
+        // Default global search: apply across searchable fields
+        $this->getFields()->filter(fn ($f) => $f->searchable)
+            ->each(function ($field) use ($global) {
+                $this->whereLike($field->attribute, $global);
+            });
 
         return $this;
     }

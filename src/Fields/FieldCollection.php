@@ -17,11 +17,15 @@ class FieldCollection extends Collection implements FieldCollectionable
 
     public function fill(Model|array $values)
     {
-        foreach ($this->items as $key => $item) {
-            if ($values instanceof Model && isset($values->{$key})) {
-                $this->items[$key] = $values->{$key};
-            } elseif (is_array($values) && isset($values[$key])) {
-                $this->items[$key] = $values[$key];
+        foreach ($this->items as $index => $field) {
+            if (! $field instanceof Field) {
+                continue;
+            }
+
+            if ($values instanceof Model && isset($values->{$field->attribute})) {
+                $this->items[$index]->value = $values->{$field->attribute};
+            } elseif (is_array($values) && array_key_exists($field->attribute, $values)) {
+                $this->items[$index]->value = $values[$field->attribute];
             }
         }
     }

@@ -28,10 +28,17 @@ class FilterCollection extends Collection implements FilterCollectionable
         if ($reqFilters) {
             $this->validateFilterInput($reqFilters);
             $this->each(function (Filter $filter) use ($request, $query, $reqFilters) {
-                if (isset($reqFilters[$filter->field])) {
-                    $filter->value = $reqFilters[$filter->field];
-                    $filter->apply($request, $query, $reqFilters[$filter->field]);
+                $hasRequestValue = array_key_exists($filter->field, $reqFilters);
+                $value = $hasRequestValue ? $reqFilters[$filter->field] : ($filter->value ?? null);
+
+                // Ignore empty strings/null unless filter explicitly wants empties
+                $shouldIgnore = $value === '' || $value === null;
+                if ($shouldIgnore) {
+                    return;
                 }
+
+                $filter->value = $value;
+                $filter->apply($request, $query, $value);
             });
         }
     }

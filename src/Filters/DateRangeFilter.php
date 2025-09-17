@@ -24,13 +24,28 @@ class DateRangeFilter extends Filter
      */
     public function apply(Request $request, Builder $query, $value)
     {
+        if (empty($this->dateFormat)) {
+            return $this; // Guard: cannot parse without format
+        }
+
         if (is_string($value)) {
             $value = explode('-', str_replace(' ', '', $value));
         }
 
+        if (! is_array($value) || count($value) < 2 || empty($value[0]) || empty($value[1])) {
+            return $this; // Ignore invalid/empty input
+        }
+
+        $start = Carbon::createFromFormat($this->dateFormat, $value[0]);
+        $end = Carbon::createFromFormat($this->dateFormat, $value[1]);
+
+        if ($start === false || $end === false) {
+            return $this; // Invalid format
+        }
+
         $this->value = [
-            Carbon::createFromFormat($this->dateFormat, $value[0])->startOfDay(),
-            Carbon::createFromFormat($this->dateFormat, $value[1])->endOfDay(),
+            $start->startOfDay(),
+            $end->endOfDay(),
         ];
 
         if (! empty($this->whereHas)) {
