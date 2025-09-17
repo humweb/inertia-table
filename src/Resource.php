@@ -75,9 +75,16 @@ abstract class Resource
 
     public function toResponse(InertiaTable $table)
     {
-        $table->columns($this->getFields())
-            ->filters($this->getFilters())
-            ->records($this->paginate($this->request->get('perPage', 15)))
+        // Respect Inertia partial reloads by skipping heavy props
+        $partialData = $this->request->headers->get('X-Inertia-Partial-Data');
+        $only = $partialData ? array_map('trim', explode(',', $partialData)) : [];
+
+        if (empty($only) || in_array('tableProps', $only, true)) {
+            $table->columns($this->getFields())
+                ->filters($this->getFilters());
+        }
+
+        $table->records($this->paginate($this->request->get('perPage', 15)))
             ->globalSearch($this->hasGlobalFilter());
 
         return $table;

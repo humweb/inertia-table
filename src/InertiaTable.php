@@ -141,7 +141,19 @@ class InertiaTable
                 ->with('pagination', Arr::except($paginated, 'data'));
         }
 
-        return $response->with('tableProps', $this->buildTableProps());
+        // Inertia partial reload support: only build tableProps when requested
+        $partialData = $this->request->headers->get('X-Inertia-Partial-Data');
+        $includeTableProps = true;
+        if (! empty($partialData)) {
+            $only = array_map('trim', explode(',', $partialData));
+            $includeTableProps = in_array('tableProps', $only, true);
+        }
+
+        if ($includeTableProps) {
+            $response->with('tableProps', $this->buildTableProps());
+        }
+
+        return $response;
     }
 
     public function columns(array|FieldCollection $columns = []): InertiaTable

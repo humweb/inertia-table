@@ -12,6 +12,15 @@ class RelationshipFilter extends Filter
     public string $relation;
     public string $column = 'id';
 
+    /**
+     * Lazy options state
+     */
+    protected ?string $optionsModelClass = null;
+    protected string $optionsLabel = 'name';
+    protected string $optionsKey = 'id';
+    /** @var callable|null */
+    protected $optionsQueryMutator = null;
+
     public static function make(string $relation, string $column = 'id'): static
     {
         $instance = new static($relation, $relation);
@@ -40,15 +49,40 @@ class RelationshipFilter extends Filter
      */
     public function fromModel(string $modelClass, string $label = 'name', string $key = 'id', ?callable $queryMutator = null): static
     {
-        /** @var \Illuminate\Database\Eloquent\Builder $query */
-        $query = $modelClass::query()->orderBy($label);
-        if ($queryMutator) {
-            $queryMutator($query);
-        }
-
-        $this->options = $query->get([$key, $label])->pluck($label, $key)->toArray();
+        // Store definition for lazy resolution during serialization only
+        $this->optionsModelClass = $modelClass;
+        $this->optionsLabel = $label;
+        $this->optionsKey = $key;
+        $this->optionsQueryMutator = $queryMutator;
 
         return $this;
+    }
+
+    protected function resolveOptionsIfNeeded(): void
+    {
+        if (! empty($this->options)) {
+            return;
+        }
+        if (empty($this->optionsModelClass)) {
+            return;
+        }
+
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = $this->optionsModelClass::query()->orderBy($this->optionsLabel);
+        if (is_callable($this->optionsQueryMutator)) {
+            ($this->optionsQueryMutator)($query);
+        }
+
+        $this->options = $query->get([$this->optionsKey, $this->optionsLabel])
+            ->pluck($this->optionsLabel, $this->optionsKey)
+            ->toArray();
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        $this->resolveOptionsIfNeeded();
+
+        return parent::jsonSerialize();
     }
 
     public function apply(Request $request, Builder $query, $value)
