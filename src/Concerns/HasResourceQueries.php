@@ -224,6 +224,7 @@ trait HasResourceQueries
 
         if (method_exists($this, 'globalFilter')) {
             $this->globalFilter($this->query, $global);
+
             return $this;
         }
 

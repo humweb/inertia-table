@@ -29,5 +29,3 @@ it('parses array inputs safely', function () {
 
     $filter->apply($request, $builder, ['2024-01-01', '2024-01-10']);
 });
-
-

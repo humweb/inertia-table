@@ -12,5 +12,3 @@ it('validates trashed filter values', function () {
     expect(fn () => $filters->validateFilterInput(['trashed' => 'bad']))
         ->toThrow(ValidationException::class);
 });
-
-

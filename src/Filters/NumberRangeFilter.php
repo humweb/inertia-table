@@ -47,5 +47,3 @@ class NumberRangeFilter extends Filter
         return $this;
     }
 }
-
-

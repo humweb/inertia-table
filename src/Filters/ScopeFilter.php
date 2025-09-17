@@ -23,5 +23,3 @@ class ScopeFilter extends Filter
         return $this;
     }
 }
-
-
