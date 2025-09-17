@@ -17,6 +17,7 @@ class RelationshipFilter extends Filter
         $instance = new static($relation, $relation);
         $instance->relation = $relation;
         $instance->column = $column;
+
         return $instance;
     }
 
@@ -33,5 +34,3 @@ class RelationshipFilter extends Filter
         return $this;
     }
 }
-
-

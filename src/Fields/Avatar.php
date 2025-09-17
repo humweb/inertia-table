@@ -6,5 +6,3 @@ class Avatar extends Field
 {
     public string $component = 'avatar-field';
 }
-
-

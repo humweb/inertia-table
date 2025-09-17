@@ -33,5 +33,3 @@ class BooleanFilter extends SelectFilter
         return parent::apply($request, $query, $value);
     }
 }
-
-

@@ -1,6 +1,5 @@
 <?php
 
-use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\Models\UserResource as TestUserResource;
 use Illuminate\Http\Request;
 
@@ -10,8 +9,10 @@ it('applies default global search when no custom method', function () {
     ]);
 
     // Create an anonymous Resource without globalFilter
-    $resource = new class($request) extends TestUserResource {
-        public function globalFilter($q, $v) {}
+    $resource = new class ($request) extends TestUserResource {
+        public function globalFilter($q, $v)
+        {
+        }
     };
 
     // Remove the globalFilter method dynamically by shadowing with noop? Not trivial; instead,
@@ -20,5 +21,3 @@ it('applies default global search when no custom method', function () {
     $resource->buildQuery();
     expect($resource->getQuery()->toSql())->not->toBeEmpty();
 });
-
-

@@ -2,7 +2,6 @@
 
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Filters\TextFilter;
-use Humweb\Table\Tests\TestCase;
 use Illuminate\Http\Request;
 
 it('ignores empty filter values', function () {
@@ -39,5 +38,3 @@ it('applies default filter value when request omits field', function () {
 
     $filters->apply($request, $mockedBuilder);
 });
-
-

@@ -6,5 +6,3 @@ class Boolean extends Field
 {
     public string $component = 'boolean-field';
 }
-
-

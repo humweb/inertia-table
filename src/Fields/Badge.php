@@ -6,5 +6,3 @@ class Badge extends Field
 {
     public string $component = 'badge-field';
 }
-
-

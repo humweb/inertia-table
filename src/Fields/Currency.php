@@ -6,5 +6,3 @@ class Currency extends Field
 {
     public string $component = 'currency-field';
 }
-
-
