@@ -106,6 +106,7 @@ class SelectFilter extends Filter
     public function jsonSerialize(): mixed
     {
         $this->resolveOptionsIfNeeded();
+
         return array_merge(parent::jsonSerialize(), [
             'multiple' => $this->multiple,
         ]);
