@@ -71,8 +71,6 @@ class SelectFilter extends Filter
         ])->toArray();
     }
 
-    // Normalization no longer needed since fromModel returns array of {key,label}. Kept intentionally minimal.
-
     /**
      * @param  Request       $request
      * @param  Builder       $query
