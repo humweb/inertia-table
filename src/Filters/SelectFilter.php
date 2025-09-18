@@ -64,10 +64,14 @@ class SelectFilter extends Filter
             ($this->optionsQueryMutator)($query);
         }
 
-        $this->options = $query->get([$this->optionsKey, $this->optionsLabel])
-            ->pluck($this->optionsLabel, $this->optionsKey)
-            ->toArray();
+        // Return an array of objects with aliased keys for stable ordering and easy sorting on the frontend
+        $this->options = $query->get([
+            $this->optionsKey.' as key',
+            $this->optionsLabel.' as label',
+        ])->toArray();
     }
+
+    // Normalization no longer needed since fromModel returns array of {key,label}. Kept intentionally minimal.
 
     /**
      * @param  Request       $request
@@ -104,7 +108,6 @@ class SelectFilter extends Filter
     public function jsonSerialize(): mixed
     {
         $this->resolveOptionsIfNeeded();
-
         return array_merge(parent::jsonSerialize(), [
             'multiple' => $this->multiple,
         ]);
