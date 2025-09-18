@@ -1,34 +1,28 @@
 <?php
 
-namespace Humweb\Table\Tests\Unit;
-
 use Humweb\Table\Filters\TrashedFilter;
-use Humweb\Table\Tests\TestCase;
+use Humweb\Table\Tests\Unit\TestBuilder;
+use Humweb\Table\Tests\Unit\TestConnection;
+use Illuminate\Http\Request;
 
-class TrashedFilterTest extends TestCase
-{
-    public function test_it_can_apply_trashed_filter()
-    {
-        $filter = TrashedFilter::make('email', 'Email');
+it('can apply trashed filter', function () {
+    $filter = TrashedFilter::make('email', 'Email');
 
-        $request = $this->request();
+    $request = Request::createFromGlobals();
 
-        $mockedBuilder = mock(TestBuilder::class)
-            ->shouldReceive('withTrashed')
-            ->once()
-            ->shouldReceive('getConnection')
-            ->andReturn(new TestConnection(''))
-            ->getMock();
+    $mockedBuilder = mock(TestBuilder::class)
+        ->shouldReceive('hasMacro')->once()->andReturn(true)
+        ->shouldReceive('withTrashed')->once()->andReturnSelf()
+        ->shouldReceive('getConnection')->andReturn(new TestConnection(''))
+        ->getMock();
 
-        $filter->apply($request, $mockedBuilder, 'with');
+    $filter->apply($request, $mockedBuilder, 'with');
 
-        $mockedBuilder = mock(TestBuilder::class)
-            ->shouldReceive('onlyTrashed')
-            ->once()
-            ->shouldReceive('getConnection')
-            ->andReturn(new TestConnection(''))
-            ->getMock();
+    $mockedBuilder = mock(TestBuilder::class)
+        ->shouldReceive('hasMacro')->once()->andReturn(true)
+        ->shouldReceive('onlyTrashed')->once()->andReturnSelf()
+        ->shouldReceive('getConnection')->andReturn(new TestConnection(''))
+        ->getMock();
 
-        $filter->apply($request, $mockedBuilder, 'only');
-    }
-}
+    $filter->apply($request, $mockedBuilder, 'only');
+});
