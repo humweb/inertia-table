@@ -18,6 +18,15 @@ class SelectFilter extends Filter
     public bool $multiple = false;
 
     /**
+     * Lazy options state (for partial reloads)
+     */
+    protected ?string $optionsModelClass = null;
+    protected string $optionsLabel = 'name';
+    protected string $optionsKey = 'id';
+    /** @var callable|null */
+    protected $optionsQueryMutator = null;
+
+    /**
      * @return SelectFilter
      */
     public function multiple(): SelectFilter
@@ -25,6 +34,39 @@ class SelectFilter extends Filter
         $this->multiple = true;
 
         return $this;
+    }
+
+    /**
+     * Populate options lazily from a model (resolved at serialization time only).
+     */
+    public function fromModel(string $modelClass, string $label = 'name', string $key = 'id', ?callable $queryMutator = null): static
+    {
+        $this->optionsModelClass = $modelClass;
+        $this->optionsLabel = $label;
+        $this->optionsKey = $key;
+        $this->optionsQueryMutator = $queryMutator;
+
+        return $this;
+    }
+
+    protected function resolveOptionsIfNeeded(): void
+    {
+        if (! empty($this->options)) {
+            return;
+        }
+        if (empty($this->optionsModelClass)) {
+            return;
+        }
+
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = $this->optionsModelClass::query()->orderBy($this->optionsLabel);
+        if (is_callable($this->optionsQueryMutator)) {
+            ($this->optionsQueryMutator)($query);
+        }
+
+        $this->options = $query->get([$this->optionsKey, $this->optionsLabel])
+            ->pluck($this->optionsLabel, $this->optionsKey)
+            ->toArray();
     }
 
     /**
@@ -61,6 +103,8 @@ class SelectFilter extends Filter
 
     public function jsonSerialize(): mixed
     {
+        $this->resolveOptionsIfNeeded();
+
         return array_merge(parent::jsonSerialize(), [
             'multiple' => $this->multiple,
         ]);
