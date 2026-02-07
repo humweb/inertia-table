@@ -6,7 +6,9 @@ use Illuminate\Support\Collection;
 
 class BasicCollectionSort implements CollectionSort
 {
-    public function __construct(public SortType $type = SortType::Auto) {}
+    public function __construct(public SortType $type = SortType::Auto)
+    {
+    }
 
     public function __invoke(Collection $collection, bool $descending, string $property): Collection
     {

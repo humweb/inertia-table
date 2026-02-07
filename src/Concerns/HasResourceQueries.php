@@ -291,7 +291,7 @@ trait HasResourceQueries
         if ($field->collectionSortStrategy) {
             $allRecords = ($field->collectionSortStrategy)($allRecords, $descending, $attribute);
         } else {
-            $allRecords = (new BasicCollectionSort)($allRecords, $descending, $attribute);
+            $allRecords = (new BasicCollectionSort())($allRecords, $descending, $attribute);
         }
 
         // Manually paginate

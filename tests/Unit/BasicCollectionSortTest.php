@@ -232,7 +232,7 @@ it('resets collection keys after sorting', function () {
 });
 
 it('defaults to auto sort type', function () {
-    $sort = new BasicCollectionSort;
+    $sort = new BasicCollectionSort();
 
     expect($sort->type)->toBe(SortType::Auto);
 });

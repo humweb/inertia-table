@@ -19,14 +19,14 @@ it('defaults to query sort mode', function () {
 });
 
 it('sets query sort mode with custom strategy', function () {
-    $field = Text::make('Name')->sortable(new NullsLastSort);
+    $field = Text::make('Name')->sortable(new NullsLastSort());
 
     expect($field->sortMode)->toBe(SortMode::Query);
     expect($field->sortableStrategy)->toBeInstanceOf(NullsLastSort::class);
 });
 
 it('auto-detects collection sort mode from CollectionSort strategy', function () {
-    $field = Computed::make('Total')->sortable(new BasicCollectionSort);
+    $field = Computed::make('Total')->sortable(new BasicCollectionSort());
 
     expect($field->sortMode)->toBe(SortMode::Collection);
     expect($field->collectionSortStrategy)->toBeInstanceOf(BasicCollectionSort::class);
@@ -77,7 +77,7 @@ it('sets client sort mode with date type', function () {
 });
 
 it('allows explicit sort mode override with collection sort', function () {
-    $field = Text::make('Name')->sortable(new BasicCollectionSort, SortMode::Collection);
+    $field = Text::make('Name')->sortable(new BasicCollectionSort(), SortMode::Collection);
 
     expect($field->sortMode)->toBe(SortMode::Collection);
 });

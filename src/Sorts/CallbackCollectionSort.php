@@ -7,7 +7,9 @@ use Illuminate\Support\Collection;
 
 class CallbackCollectionSort implements CollectionSort
 {
-    public function __construct(private Closure $callback) {}
+    public function __construct(private Closure $callback)
+    {
+    }
 
     public function __invoke(Collection $collection, bool $descending, string $property): Collection
     {
