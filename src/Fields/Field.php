@@ -7,7 +7,10 @@ use Humweb\Table\Concerns\Makeable;
 use Humweb\Table\Concerns\Metable;
 use Humweb\Table\Concerns\Transformable;
 use Humweb\Table\Sorts\BasicSort;
+use Humweb\Table\Sorts\CollectionSort;
 use Humweb\Table\Sorts\Sort;
+use Humweb\Table\Sorts\SortMode;
+use Humweb\Table\Sorts\SortType;
 use Humweb\Table\Validation\HasValidationRules;
 use Illuminate\Support\Str;
 use JsonSerializable;
@@ -71,6 +74,12 @@ class Field implements JsonSerializable
      */
     public Sort $sortableStrategy;
 
+    public ?CollectionSort $collectionSortStrategy = null;
+
+    public SortMode $sortMode = SortMode::Query;
+
+    public SortType $sortType = SortType::Auto;
+
     /**
      * @var bool
      */
@@ -90,15 +99,44 @@ class Field implements JsonSerializable
     }
 
     /**
+     * Make the field sortable with an optional strategy and mode.
      *
-     * @param  Sort|null  $class
+     * @param  Sort|CollectionSort|null  $strategy
+     * @param  SortMode                  $mode
      *
-     * @return Field
+     * @return static
      */
-    public function sortable(?Sort $class = null): Field
+    public function sortable(Sort|CollectionSort|null $strategy = null, SortMode $mode = SortMode::Query): static
     {
         $this->sortable = true;
-        $this->sortableStrategy = is_null($class) ? new BasicSort() : $class;
+
+        if ($strategy instanceof CollectionSort) {
+            $this->sortMode = $mode === SortMode::Query ? SortMode::Collection : $mode;
+            $this->collectionSortStrategy = $strategy;
+
+            if ($strategy instanceof \Humweb\Table\Sorts\BasicCollectionSort) {
+                $this->sortType = $strategy->type;
+            }
+        } else {
+            $this->sortMode = $mode;
+            $this->sortableStrategy = $strategy ?? new BasicSort();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Make the field sortable on the client (frontend) with no server round-trip.
+     *
+     * @param  SortType  $type
+     *
+     * @return static
+     */
+    public function sortableOnClient(SortType $type = SortType::Auto): static
+    {
+        $this->sortable = true;
+        $this->sortMode = SortMode::Client;
+        $this->sortType = $type;
 
         return $this;
     }
@@ -164,7 +202,9 @@ class Field implements JsonSerializable
             'attribute' => $this->attribute,
             'name' => $this->name,
             'nullable' => $this->nullable,
-            'sortable' => $this->sortable,
+            'sortable' => (bool) $this->sortable,
+            'sortMode' => $this->sortMode->value,
+            'sortType' => $this->sortType->value,
             'visible' => $this->visible,
             'visibility' => $this->visibility,
             'searchable' => $this->searchable,

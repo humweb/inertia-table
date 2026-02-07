@@ -2,7 +2,10 @@
 
 namespace Humweb\Table\Concerns;
 
+use Humweb\Table\Sorts\BasicCollectionSort;
+use Humweb\Table\Sorts\SortMode;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -48,8 +51,12 @@ trait HasResourceQueries
             $perPage = $maxPerPage;
         }
 
+        // Collection-sort fields require fetching all records, sorting, then paginating manually
+        if ($this->findActiveCollectionSortField()) {
+            return $this->paginateWithCollectionSort($perPage, $columns, $pageName, $page);
+        }
+
         $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
-        //$data = $this->query->fastPaginate($perPage, $columns, $pageName, $page)->withQueryString();
 
         $data = $this->getFields()->applyTransform($data);
 
@@ -185,7 +192,7 @@ trait HasResourceQueries
     }
 
     /**
-     * Apply default sort to builder
+     * Apply query-based sorts to the builder (skips Collection and Client sort modes).
      *
      * @return $this
      */
@@ -200,13 +207,104 @@ trait HasResourceQueries
             }
 
             $this->getFields()->each(function ($field) use ($sortField, $descending) {
-                if ($field->attribute == $sortField && $field->sortable) {
+                if ($field->attribute == $sortField && $field->sortable && $field->sortMode === SortMode::Query) {
                     ($field->sortableStrategy)($this->query, $descending, $sortField);
                 }
             });
         }
 
         return $this;
+    }
+
+    /**
+     * Find the active collection-sort field, if any.
+     *
+     * @return \Humweb\Table\Fields\Field|null
+     */
+    protected function findActiveCollectionSortField(): ?\Humweb\Table\Fields\Field
+    {
+        if (! $this->request->has('sort')) {
+            return null;
+        }
+
+        $sortField = $this->request->get('sort');
+        $rawField = ltrim($sortField, '-');
+
+        return $this->getFields()->first(function ($field) use ($rawField) {
+            return $field->attribute === $rawField
+                && $field->sortable
+                && $field->sortMode === SortMode::Collection;
+        });
+    }
+
+    /**
+     * Apply collection-based sorting to a paginated result.
+     *
+     * Fetches all matching records, applies transforms, sorts, then manually paginates.
+     *
+     * @param  int     $perPage
+     * @param  array   $columns
+     * @param  string  $pageName
+     * @param  int|null $page
+     *
+     * @return LengthAwarePaginator
+     */
+    protected function paginateWithCollectionSort(int $perPage, array $columns = ['*'], string $pageName = 'page', ?int $page = null): LengthAwarePaginator
+    {
+        $sortField = $this->request->get('sort');
+        $descending = str_starts_with($sortField, '-');
+        $attribute = ltrim($sortField, '-');
+
+        $field = $this->findActiveCollectionSortField();
+
+        $allRecords = $this->query->get($columns);
+
+        // Apply field transforms
+        $transformableFields = $this->getFields()->filter(fn ($f) => $f->hasTransform() || $f->hasCallableTransform());
+        if ($transformableFields->isNotEmpty()) {
+            $allRecords = $allRecords->map(function ($record) use ($transformableFields) {
+                $record = $record->toArray();
+                foreach ($transformableFields as $f) {
+                    $value = data_get($record, $f->attribute);
+                    if ($f->hasTransform()) {
+                        $value = $f->transform($value);
+                    } elseif ($f->hasCallableTransform()) {
+                        $value = ($f->callableTransform)($value);
+                    }
+                    data_set($record, $f->attribute, $value);
+                }
+
+                return $record;
+            });
+        } else {
+            $allRecords = $allRecords->map(fn ($record) => $record->toArray());
+        }
+
+        // Apply runtime transform
+        if ($this->runtimeTransform) {
+            $allRecords = $allRecords->map($this->runtimeTransform);
+        } elseif (method_exists($this, 'transform')) {
+            $allRecords = $allRecords->map($this->transform());
+        }
+
+        // Apply collection sort
+        if ($field->collectionSortStrategy) {
+            $allRecords = ($field->collectionSortStrategy)($allRecords, $descending, $attribute);
+        } else {
+            $allRecords = (new BasicCollectionSort)($allRecords, $descending, $attribute);
+        }
+
+        // Manually paginate
+        $currentPage = $page ?? LengthAwarePaginator::resolveCurrentPage($pageName);
+        $sliced = $allRecords->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        return (new LengthAwarePaginator(
+            $sliced,
+            $allRecords->count(),
+            $perPage,
+            $currentPage,
+            ['pageName' => $pageName],
+        ))->withQueryString();
     }
 
     /**
