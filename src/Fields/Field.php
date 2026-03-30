@@ -81,6 +81,11 @@ class Field implements JsonSerializable
     public SortType $sortType = SortType::Auto;
 
     /**
+     * Alternative data path used for sorting instead of the display attribute.
+     */
+    public ?string $sortField = null;
+
+    /**
      * @var bool
      */
     public bool $visible = true;
@@ -137,6 +142,16 @@ class Field implements JsonSerializable
         $this->sortable = true;
         $this->sortMode = SortMode::Client;
         $this->sortType = $type;
+
+        return $this;
+    }
+
+    /**
+     * Set an alternative data path for sorting (e.g. a raw/unformatted field).
+     */
+    public function sortField(string $field): static
+    {
+        $this->sortField = $field;
 
         return $this;
     }
@@ -205,6 +220,7 @@ class Field implements JsonSerializable
             'sortable' => (bool) $this->sortable,
             'sortMode' => $this->sortMode->value,
             'sortType' => $this->sortType->value,
+            'sortField' => $this->sortField,
             'visible' => $this->visible,
             'visibility' => $this->visibility,
             'searchable' => $this->searchable,
