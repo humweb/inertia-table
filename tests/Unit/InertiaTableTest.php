@@ -5,6 +5,7 @@ namespace Humweb\Table\Tests\Unit;
 use Humweb\Table\Fields\Text;
 use Humweb\Table\Filters\SelectFilter;
 use Humweb\Table\InertiaTable;
+use Humweb\Table\TableRequest;
 use Illuminate\Http\Request;
 use Illuminate\Testing\Assert;
 use Orchestra\Testbench\TestCase;
@@ -26,7 +27,7 @@ class InertiaTableTest extends TestCase
             $request->query->set('sort', 'name');
         });
 
-        $props = (new InertiaTable($request))->buildTableProps();
+        $props = (new InertiaTable(new TableRequest($request)))->buildTableProps();
 
         $this->assertEquals("name", $props['sort']);
     }
@@ -34,7 +35,7 @@ class InertiaTableTest extends TestCase
     #[Test]
     public function it_can_add_a_column_to_toggle()
     {
-        $table = new InertiaTable($this->request());
+        $table = new InertiaTable(new TableRequest($this->request()));
         $table->columns->push(Text::make('name', 'Name'));
 
         $props = $table->buildTableProps();
@@ -49,7 +50,7 @@ class InertiaTableTest extends TestCase
     #[Test]
     public function it_can_add_a_column_that_is_disabled_by_default()
     {
-        $table = new InertiaTable($this->request());
+        $table = new InertiaTable(new TableRequest($this->request()));
         $table->columns->push(Text::make('name', 'Name')->visible(false));
 
         $props = $table->buildTableProps();
@@ -64,7 +65,7 @@ class InertiaTableTest extends TestCase
     #[Test]
     public function it_can_add_a_search_row()
     {
-        $table = new InertiaTable($this->request());
+        $table = new InertiaTable(new TableRequest($this->request()));
         $table->columns([
             Text::make('Name')->searchable(),
         ]);
@@ -82,11 +83,11 @@ class InertiaTableTest extends TestCase
     #[Test]
     public function it_gets_the_default_search_values_from_the_request_query()
     {
-        $table = new InertiaTable($this->request(function (Request $request) {
+        $table = new InertiaTable(new TableRequest($this->request(function (Request $request) {
             $request->query->set('search', [
                 'name' => 'foobar',
             ]);
-        }));
+        })));
 
         $table->columns([
             Text::make('Name')->searchable(),
@@ -101,12 +102,12 @@ class InertiaTableTest extends TestCase
     #[Test]
     public function it_gets_the_default_filter_values_from_the_request_query()
     {
-        $table = new InertiaTable($this->request(function (Request $request) {
+        $table = new InertiaTable(new TableRequest($this->request(function (Request $request) {
             $request->query->set('filters', [
                 'name' => 'foo',
                 'email' => 'bar',
             ]);
-        }));
+        })));
 
         $table->filters([
             SelectFilter::make('name', 'Name', ['foo' => 'foobar']),
@@ -122,7 +123,7 @@ class InertiaTableTest extends TestCase
     #[Test]
     public function it_can_add_a_filter_with_options()
     {
-        $table = new InertiaTable($this->request());
+        $table = new InertiaTable(new TableRequest($this->request()));
         $table->filters([
             SelectFilter::make('name', 'Name', [
             'a' => 'Option A',

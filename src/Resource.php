@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Humweb\Table;
 
 use Humweb\Table\Concerns\ForwardsCalls;
@@ -10,59 +12,45 @@ use Humweb\Table\Contracts\FilterCollectionable;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Sorts\Sort;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 abstract class Resource
 {
-    use Makeable;
     use ForwardsCalls;
     use HasResourceQueries;
+    use Makeable;
 
     public string $title;
+
     public string $primaryKey = 'id';
 
+    /** @var array<string, mixed> */
     public array $parameters = [];
 
     protected Request $request;
 
-    /**
-     * @var FilterCollection
-     */
     protected FilterCollection $filters;
 
-
-    /**
-     * @var string|Sort
-     */
+    /** @var string|Sort */
     public string|Sort $defaultSort = 'id';
-
-    public $driver = 'pgsql';
 
     public mixed $runtimeTransform = null;
 
-    /**
-     * @var string
-     */
-    protected $model;
+    /** @var class-string<\Illuminate\Database\Eloquent\Model> */
+    protected string $model;
 
-    public function __construct(Request $request, $parameters = [])
+    public function __construct(Request $request, array $parameters = [])
     {
         $this->newQuery();
-
         $this->request = $request;
         $this->parameters = $parameters;
     }
 
     /**
-     * Add parameters from route
-     *
-     * @param  string|array  $key
-     * @param  string|null   $value
-     *
-     * @return static
+     * @param  string|array<string, string>  $key
      */
-    public function addParameter(string|array $key, string $value = null): static
+    public function addParameter(string|array $key, ?string $value = null): static
     {
         if (is_array($key)) {
             $this->parameters = array_merge($this->parameters, $key);
@@ -73,18 +61,16 @@ abstract class Resource
         return $this;
     }
 
-    public function toResponse(InertiaTable $table)
+    public function toResponse(InertiaTable $table): InertiaTable
     {
-        // Respect Inertia partial reloads by skipping heavy props
-        $partialData = $this->request->headers->get('X-Inertia-Partial-Data');
-        $only = $partialData ? array_map('trim', explode(',', $partialData)) : [];
+        $this->setTableRequest($table->getTableRequest());
 
-        if (empty($only) || in_array('tableProps', $only, true)) {
-            $table->columns($this->getFields())
-                ->filters($this->getFilters());
-        }
+        $tableRequest = $table->getTableRequest();
+        $defaultPerPage = (int) config('inertia-table.pagination.default_per_page', 15);
 
-        $table->records($this->paginate($this->request->get('perPage', 15)))
+        $table->columns($this->getFields())
+            ->filters($this->getFilters())
+            ->records($this->paginate($tableRequest->getPerPage($defaultPerPage)))
             ->globalSearch($this->hasGlobalFilter());
 
         return $table;
@@ -92,30 +78,21 @@ abstract class Resource
 
     abstract public function fields(): FieldCollectionable;
 
-    /**
-     * @return FieldCollection
-     */
     public function getFields(): FieldCollectionable
     {
         return $this->fields();
     }
 
-    public function toForm($model = [])
+    public function toForm(mixed $model = []): FieldCollection
     {
         $fields = $this->fields();
-
         $fields->fill($model);
 
         return $fields;
     }
 
-    /**
-     * @return FilterCollection
-     */
     public function getFilters(): FilterCollectionable
     {
-        // If we pass a matching url parameter to the resource
-        // We don't show the filter.
         return $this->filters()->filter(function ($filter) {
             return ! isset($this->parameters[$filter->field]);
         })->values();
@@ -123,13 +100,10 @@ abstract class Resource
 
     public function filters(): FilterCollectionable
     {
-        return new FilterCollection();
+        return new FilterCollection;
     }
 
     /**
-     * @param  string  $name
-     * @param  array   $arguments
-     *
      * @return mixed
      */
     public function __call(string $name, array $arguments)
@@ -137,19 +111,6 @@ abstract class Resource
         return $this->forwardCallTo($this->query, $name, $arguments);
     }
 
-    /**
-     * @return Builder
-     */
-    public function getQuery(): Builder
-    {
-        return $this->query;
-    }
-
-    /**
-     * @param  callable  $runtimeTransform
-     *
-     * @return static
-     */
     public function runtimeTransform(callable $runtimeTransform): static
     {
         $this->runtimeTransform = $runtimeTransform;

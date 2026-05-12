@@ -19,9 +19,9 @@ class UserResource extends Resource
     public FieldCollection $field;
     public FilterCollection $filters;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, array $parameters = [])
     {
-        parent::__construct($request);
+        parent::__construct($request, $parameters);
     }
 
     /**

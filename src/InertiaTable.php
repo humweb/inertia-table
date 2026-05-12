@@ -1,39 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Humweb\Table;
 
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Inertia\Response;
 
 class InertiaTable
 {
-    public Request $request;
     public FieldCollection $columns;
-    public FilterCollection $filters;
-    public Collection $search;
-    public bool $globalSearch = true;
-    public LengthAwarePaginator|null $records = null;
 
-    public function __construct(Request $request)
-    {
-        $this->request = $request;
-        $this->columns = new FieldCollection();
-        $this->filters = new FilterCollection();
+    public FilterCollection $filters;
+
+    public Collection $search;
+
+    public bool $globalSearch = true;
+
+    public ?LengthAwarePaginator $records = null;
+
+    public function __construct(
+        public TableRequest $tableRequest,
+    ) {
+        $this->columns = new FieldCollection;
+        $this->filters = new FilterCollection;
         $this->search = collect();
     }
 
-    /**
-     * @param  bool  $bool
-     *
-     * @return $this
-     */
-    public function globalSearch(bool $bool): InertiaTable
+    public function globalSearch(bool $bool): static
     {
         $this->globalSearch = $bool;
 
@@ -41,9 +38,9 @@ class InertiaTable
     }
 
     /**
-     * Build main props to share with table component
+     * Build the props payload for a single table.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function buildTableProps(): array
     {
@@ -51,10 +48,12 @@ class InertiaTable
         $search = $this->transformSearch();
         $filters = $this->transformFilters();
 
+        $defaultPerPage = (int) config('inertia-table.pagination.default_per_page', 15);
+
         return [
-            'sort' => $this->request->query('sort'),
-            'page' => Paginator::resolveCurrentPage(),
-            'perPage' => $this->request->get('perPage', 15),
+            'sort' => $this->tableRequest->getSortParam(),
+            'page' => $this->tableRequest->getPage(),
+            'perPage' => $this->tableRequest->getPerPage($defaultPerPage),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
             'search' => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
@@ -62,19 +61,35 @@ class InertiaTable
     }
 
     /**
-     * Transform the column collection for frontend.
+     * Build the full resolved payload for this table (records + pagination + tableProps).
      *
-     * @return \Illuminate\Support\Collection
+     * @return array<string, mixed>
      */
+    public function resolve(): array
+    {
+        $result = [
+            'tableProps' => $this->buildTableProps(),
+        ];
+
+        if ($this->records instanceof LengthAwarePaginator) {
+            $paginated = $this->records->toArray();
+            $result['records'] = $paginated['data'];
+            $result['pagination'] = Arr::except($paginated, 'data');
+        }
+
+        return $result;
+    }
+
     private function flagVisibility(): Collection
     {
-        $columns = explode(',', $this->request->query('hidden', ''));
+        $hidden = $this->tableRequest->getHiddenColumns();
+        $columns = $hidden !== '' ? explode(',', $hidden) : [];
 
-        if ($columns == '') {
+        if (empty($columns)) {
             return $this->columns;
         }
 
-        return $this->columns->map(function ($column, $key) use ($columns) {
+        return $this->columns->map(function ($column) use ($columns) {
             if (in_array($column->attribute, $columns)) {
                 $column->visible(false);
             }
@@ -83,14 +98,9 @@ class InertiaTable
         });
     }
 
-    /**
-     * Transform the search collection for the frontend
-     *
-     * @return \Illuminate\Support\Collection
-     */
     private function transformSearch(): Collection
     {
-        $requestSearches = $this->request->query('search', []);
+        $requestSearches = $this->tableRequest->getSearchParams();
 
         if ($this->globalSearch) {
             $this->searchable('global', 'Search..', Arr::get($requestSearches, 'global'));
@@ -104,14 +114,9 @@ class InertiaTable
         return $this->search;
     }
 
-    /**
-     * Transform the filters collection for frontend
-     *
-     * @return \Illuminate\Support\Collection
-     */
     private function transformFilters(): Collection
     {
-        $requestFilters = $this->request->query('filters', []);
+        $requestFilters = $this->tableRequest->getFilterParams();
 
         if (empty($requestFilters)) {
             return $this->filters;
@@ -126,37 +131,7 @@ class InertiaTable
         });
     }
 
-    /**
-     * Share query builder props with Inertia response.
-     *
-     * @param  \Inertia\Response  $response
-     *
-     * @return \Inertia\Response
-     */
-    public function withProps(Response $response): Response
-    {
-        if ($this->records instanceof LengthAwarePaginator) {
-            $paginated = $this->records->toArray();
-            $response->with('records', $paginated['data'])
-                ->with('pagination', Arr::except($paginated, 'data'));
-        }
-
-        // Inertia partial reload support: only build tableProps when requested
-        $partialData = $this->request->headers->get('X-Inertia-Partial-Data');
-        $includeTableProps = true;
-        if (! empty($partialData)) {
-            $only = array_map('trim', explode(',', $partialData));
-            $includeTableProps = in_array('tableProps', $only, true);
-        }
-
-        if ($includeTableProps) {
-            $response->with('tableProps', $this->buildTableProps());
-        }
-
-        return $response;
-    }
-
-    public function columns(array|FieldCollection $columns = []): InertiaTable
+    public function columns(array|FieldCollection $columns = []): static
     {
         if (! ($columns instanceof FieldCollection)) {
             $columns = new FieldCollection($columns);
@@ -168,14 +143,9 @@ class InertiaTable
     }
 
     /**
-     * Add a search row to the query builder.
-     *
      * @param  string|array  $columns
-     * @param  string|null   $label
-     *
-     * @return self
      */
-    public function searchable(string|array $columns, string $label = null, $value = null): InertiaTable
+    public function searchable(string|array $columns, ?string $label = null, mixed $value = null): static
     {
         if (is_array($columns)) {
             foreach ($columns as $id => $label) {
@@ -193,25 +163,26 @@ class InertiaTable
         return $this;
     }
 
-    public function filters(FilterCollection|array $filters): InertiaTable
+    public function filters(FilterCollection|array $filters): static
     {
         if (is_array($filters)) {
             $filters = new FilterCollection($filters);
         }
+
         $this->filters = $filters;
 
         return $this;
     }
 
-    /**
-     * @param  LengthAwarePaginator  $records
-     *
-     * @return InertiaTable
-     */
-    public function records(LengthAwarePaginator $records)
+    public function records(LengthAwarePaginator $records): static
     {
         $this->records = $records;
 
         return $this;
+    }
+
+    public function getTableRequest(): TableRequest
+    {
+        return $this->tableRequest;
     }
 }
