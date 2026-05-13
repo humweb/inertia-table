@@ -3,6 +3,7 @@
 namespace Humweb\Table\Tests\Unit;
 
 use Humweb\Table\InertiaTable;
+use Humweb\Table\TableRequest;
 use Humweb\Table\Tests\Models\User;
 use Humweb\Table\Tests\Models\UserResource;
 use Humweb\Table\Tests\TestCase;
@@ -27,7 +28,7 @@ class ResourceTest extends TestCase
      */
     public function test_it_can_build_response()
     {
-        $table = new InertiaTable($this->request());
+        $table = new InertiaTable(new TableRequest($this->request()));
         $this->resource->toResponse($table);
         $this->assertEquals('id', $table->columns[0]->attribute);
         $this->assertEquals('name', $table->columns[1]->attribute);
@@ -65,25 +66,6 @@ class ResourceTest extends TestCase
         }))->paginate();
 
         $this->assertQueryLogContains('where name like \'%foobar%\' order by "id" asc limit 15 offset 0');
-    }
-
-    /**
-     * @return void
-     */
-    public function test_it_can_apply_search_with_pgsql_driver()
-    {
-        DB::enableQueryLog();
-        $this->resource = UserResource::make($this->request(function (Request $request) {
-            $request->query->set('search', [
-                'name' => 'foobar',
-            ]);
-        }));
-
-        $this->resource->driver = 'pgsql';
-        $this->resource->whereLike('name', 'foobar');
-        $output = $this->resource->getQuery()->toSql();
-
-        $this->assertEquals('select * from "test_users" where name ilike ?', $output);
     }
 
     /**

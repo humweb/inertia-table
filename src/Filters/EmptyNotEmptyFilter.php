@@ -23,9 +23,13 @@ class EmptyNotEmptyFilter extends SelectFilter
     public function apply(Request $request, Builder $query, $value)
     {
         if ($value === 'empty') {
-            $query->whereNull($this->field)->orWhere($this->field, '=', '');
+            $query->where(function ($q) {
+                $q->whereNull($this->field)->orWhere($this->field, '=', '');
+            });
         } elseif ($value === 'not_empty') {
-            $query->whereNotNull($this->field)->where($this->field, '!=', '');
+            $query->where(function ($q) {
+                $q->whereNotNull($this->field)->where($this->field, '!=', '');
+            });
         }
 
         return $this;

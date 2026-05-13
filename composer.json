@@ -1,6 +1,6 @@
 {
     "name": "humweb/inertia-table",
-    "description": "This is my package inertia-table",
+    "description": "Inertia.js table component with sorting, filtering, searching, and multi-table support for Laravel",
     "keywords": [
         "humweb",
         "laravel",
@@ -19,6 +19,7 @@
         "php": "^8.2",
         "illuminate/contracts": "^10.0||^11.0||^12.0",
         "inertiajs/inertia-laravel": "^3",
+        "kirschbaum-development/eloquent-power-joins": "^4.0",
         "spatie/laravel-package-tools": "^1.19"
     },
     "require-dev": {

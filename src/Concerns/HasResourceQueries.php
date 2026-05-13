@@ -1,27 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Humweb\Table\Concerns;
 
+use Humweb\Table\Pipeline\ApplyCustomFilters;
+use Humweb\Table\Pipeline\ApplyDefaultSort;
+use Humweb\Table\Pipeline\ApplyEagerLoads;
+use Humweb\Table\Pipeline\ApplyFilters;
+use Humweb\Table\Pipeline\ApplyGlobalSearch;
+use Humweb\Table\Pipeline\ApplySearch;
+use Humweb\Table\Pipeline\ApplySorts;
+use Humweb\Table\Pipeline\QueryPipeline;
 use Humweb\Table\Sorts\BasicCollectionSort;
 use Humweb\Table\Sorts\SortMode;
-use Illuminate\Contracts\Database\Query\Builder;
+use Humweb\Table\TableRequest;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 trait HasResourceQueries
 {
-    /**
-     * @var Builder
-     */
-    protected Builder $query;
+    protected Builder|QueryBuilder $query;
 
-    /**
-     * @var array
-     */
-    protected array $sorts;
+    /** @var array<int, string> */
+    protected array $with = [];
 
-    public function getSelectData()
+    protected ?TableRequest $tableRequest = null;
+
+    public function setTableRequest(TableRequest $tableRequest): static
+    {
+        $this->tableRequest = $tableRequest;
+
+        return $this;
+    }
+
+    public function getSelectData(): mixed
     {
         return $this->query->get(['title', 'id'])
             ->map(fn ($row) => [
@@ -31,33 +45,25 @@ trait HasResourceQueries
     }
 
     /**
-     * Query and paginate data from database
-     *
-     * @param  int     $perPage
-     * @param  array   $columns
-     * @param  string  $pageName
-     * @param  int     $page
-     *
-     * @return mixed
+     * @return LengthAwarePaginator
      */
-    public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
+    public function paginate(?int $perPage = null, array $columns = ['*'], string $pageName = 'page', ?int $page = null): LengthAwarePaginator
     {
         $this->buildQuery();
 
         $defaultPerPage = (int) config('inertia-table.pagination.default_per_page', 15);
         $maxPerPage = (int) config('inertia-table.pagination.max_per_page', 100);
         $perPage = (int) ($perPage ?? $defaultPerPage);
+
         if ($perPage > $maxPerPage) {
             $perPage = $maxPerPage;
         }
 
-        // Collection-sort fields require fetching all records, sorting, then paginating manually
         if ($this->findActiveCollectionSortField()) {
             return $this->paginateWithCollectionSort($perPage, $columns, $pageName, $page);
         }
 
         $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
-
         $data = $this->getFields()->applyTransform($data);
 
         if ($this->runtimeTransform) {
@@ -69,165 +75,70 @@ trait HasResourceQueries
         return $data;
     }
 
-    public function buildQuery()
+    public function buildQuery(): void
     {
-        $this->applyDefaultSort()
-            ->applyEagerLoads()
-            ->applySorts()
-            ->applyGlobalFilter()
-            ->applyCustomFilters()
-            ->applySearch()
-            ->applyFilters();
-    }
+        $pipeline = $this->buildPipeline();
+        $tableRequest = $this->resolveTableRequest();
 
-    public function applySearch()
-    {
-        $searchParams = $this->request->get('search');
-
-        if ($searchParams) {
-            $this->getFields()->filter(fn ($fld) => $fld->searchable)->each(function ($field) use ($searchParams) {
-                if (isset($searchParams[$field->attribute]) && ! empty($searchParams[$field->attribute])) {
-                    $this->whereLike($field->attribute, $searchParams[$field->attribute]);
-                }
-            });
-        }
-
-        return $this;
-    }
-
-    public function whereLike($field, $value)
-    {
-        if (is_numeric($value)) {
-            $this->query->where(DB::raw($field), $value);
-
-            return $this;
-        }
-        if ($this->driver == 'pgsql') {
-            $like = 'ilike';
-        } elseif ($this->driver == 'sqlite') {
-            $like = 'like';
-        } else {
-            $field = "LOWER({$field})";
-            $like = 'like';
-        }
-
-        $this->query->where(DB::raw($field), $like, '%'.strtolower($value).'%');
+        $this->query = $pipeline->process($this->query, $tableRequest);
     }
 
     /**
-     * Create new query builder instance
-     *
-     * @return $this
+     * Build the default query pipeline. Override in resource subclasses for customization.
      */
+    protected function buildPipeline(): QueryPipeline
+    {
+        $pipeline = new QueryPipeline();
+
+        $globalSearchHandler = method_exists($this, 'globalFilter')
+            ? fn ($query, $value) => $this->globalFilter($query, $value)
+            : null;
+
+        $pipeline->through(
+            new ApplyEagerLoads($this->with),
+            new ApplyDefaultSort(
+                $this->defaultSort,
+                method_exists($this, 'defaultSort') ? fn ($query) => $this->defaultSort($query) : null,
+            ),
+            new ApplySorts($this->getFields()),
+            new ApplyGlobalSearch($this->getFields(), $globalSearchHandler),
+            new ApplyCustomFilters($this->parameters, $this),
+            new ApplySearch($this->getFields()),
+            new ApplyFilters($this->getFilters()),
+        );
+
+        if (method_exists($this, 'pipeline')) {
+            $pipeline = $this->pipeline($pipeline);
+        }
+
+        return $pipeline;
+    }
+
+    protected function resolveTableRequest(): TableRequest
+    {
+        if ($this->tableRequest !== null) {
+            return $this->tableRequest;
+        }
+
+        return new TableRequest($this->request);
+    }
+
     public function newQuery(): static
     {
         $this->query = $this->model::query();
-        $this->driver = $this->query->getConnection()->getDriverName();
 
         return $this;
     }
 
-    /**
-     * Applies eager load relationships to query
-     *
-     * @return $this
-     */
-    public function applyEagerLoads()
-    {
-        if (! empty($this->with)) {
-            $this->query->with($this->with);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Apply custom filters to query
-     *
-     * @return $this
-     */
-    public function applyCustomFilters(): static
-    {
-        foreach ($this->parameters as $key => $value) {
-            $method = 'filter'.Str::studly(str_replace('.', '_', $key));
-            if (method_exists($this, $method)) {
-                $this->{$method}($value);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add allowed filters to query builder
-     *
-     * @return $this
-     */
-    protected function applyFilters(): static
-    {
-        $this->getFilters()->apply($this->request, $this->query);
-
-
-        return $this;
-    }
-
-    /**
-     * Apply default sort to builder
-     *
-     * @return $this
-     */
-    public function applyDefaultSort(): static
-    {
-        if ($this->request->has('sort')) {
-            return $this;
-        }
-
-        if (method_exists($this, 'defaultSort')) {
-            $this->defaultSort($this->query);
-        } elseif (is_string($this->defaultSort)) {
-            $this->request->merge(['sort' => $this->defaultSort]);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Apply query-based sorts to the builder (skips Collection and Client sort modes).
-     *
-     * @return $this
-     */
-    public function applySorts(): static
-    {
-        if ($this->request->has('sort')) {
-            $sortField = $this->request->get('sort');
-            $descending = str_starts_with($sortField, '-');
-
-            if ($descending) {
-                $sortField = str_replace('-', '', $sortField);
-            }
-
-            $this->getFields()->each(function ($field) use ($sortField, $descending) {
-                if ($field->attribute == $sortField && $field->sortable && $field->sortMode === SortMode::Query) {
-                    ($field->sortableStrategy)($this->query, $descending, $sortField);
-                }
-            });
-        }
-
-        return $this;
-    }
-
-    /**
-     * Find the active collection-sort field, if any.
-     *
-     * @return \Humweb\Table\Fields\Field|null
-     */
     protected function findActiveCollectionSortField(): ?\Humweb\Table\Fields\Field
     {
-        if (! $this->request->has('sort')) {
+        $tableRequest = $this->resolveTableRequest();
+
+        if (! $tableRequest->has('sort')) {
             return null;
         }
 
-        $sortField = $this->request->get('sort');
+        $sortField = $tableRequest->getSortParam();
         $rawField = ltrim($sortField, '-');
 
         return $this->getFields()->first(function ($field) use ($rawField) {
@@ -237,21 +148,10 @@ trait HasResourceQueries
         });
     }
 
-    /**
-     * Apply collection-based sorting to a paginated result.
-     *
-     * Fetches all matching records, applies transforms, sorts, then manually paginates.
-     *
-     * @param  int     $perPage
-     * @param  array   $columns
-     * @param  string  $pageName
-     * @param  int|null $page
-     *
-     * @return LengthAwarePaginator
-     */
     protected function paginateWithCollectionSort(int $perPage, array $columns = ['*'], string $pageName = 'page', ?int $page = null): LengthAwarePaginator
     {
-        $sortField = $this->request->get('sort');
+        $tableRequest = $this->resolveTableRequest();
+        $sortField = $tableRequest->getSortParam();
         $descending = str_starts_with($sortField, '-');
         $attribute = ltrim($sortField, '-');
 
@@ -259,7 +159,6 @@ trait HasResourceQueries
 
         $allRecords = $this->query->get($columns);
 
-        // Apply field transforms
         $transformableFields = $this->getFields()->filter(fn ($f) => $f->hasTransform() || $f->hasCallableTransform());
         if ($transformableFields->isNotEmpty()) {
             $allRecords = $allRecords->map(function ($record) use ($transformableFields) {
@@ -280,21 +179,18 @@ trait HasResourceQueries
             $allRecords = $allRecords->map(fn ($record) => $record->toArray());
         }
 
-        // Apply runtime transform
         if ($this->runtimeTransform) {
             $allRecords = $allRecords->map($this->runtimeTransform);
         } elseif (method_exists($this, 'transform')) {
             $allRecords = $allRecords->map($this->transform());
         }
 
-        // Apply collection sort
         if ($field->collectionSortStrategy) {
             $allRecords = ($field->collectionSortStrategy)($allRecords, $descending, $attribute);
         } else {
             $allRecords = (new BasicCollectionSort())($allRecords, $descending, $attribute);
         }
 
-        // Manually paginate
         $currentPage = $page ?? LengthAwarePaginator::resolveCurrentPage($pageName);
         $sliced = $allRecords->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
@@ -307,46 +203,13 @@ trait HasResourceQueries
         ))->withQueryString();
     }
 
-    /**
-     * Add global filter if it exists
-     *
-     * @return $this
-     */
-    public function applyGlobalFilter(): static
-    {
-        if (! $this->requestHasGlobalFilter()) {
-            return $this;
-        }
-
-        $global = $this->request->get('search')['global'];
-
-        if (method_exists($this, 'globalFilter')) {
-            $this->globalFilter($this->query, $global);
-
-            return $this;
-        }
-
-        // Default global search: apply across searchable fields
-        $this->getFields()->filter(fn ($f) => $f->searchable)
-            ->each(function ($field) use ($global) {
-                $this->whereLike($field->attribute, $global);
-            });
-
-        return $this;
-    }
-
-    public function requestHasGlobalFilter()
-    {
-        return array_key_exists('global', $this->request->get('search', []));
-    }
-
-    /**
-     * @codeCoverageIgnore
-     *
-     * @return bool
-     */
-    public function hasGlobalFilter()
+    public function hasGlobalFilter(): bool
     {
         return method_exists($this, 'globalFilter');
+    }
+
+    public function getQuery(): Builder|QueryBuilder
+    {
+        return $this->query;
     }
 }
