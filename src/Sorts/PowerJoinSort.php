@@ -15,7 +15,8 @@ class PowerJoinSort implements Sort
     public function __construct(
         protected string $relation,
         protected string $column,
-    ) {}
+    ) {
+    }
 
     public function __invoke(Builder $query, bool $descending, string $property): void
     {

@@ -17,7 +17,8 @@ class AggregateSort implements Sort
         protected string $relation,
         protected string $function = 'count',
         protected ?string $column = null,
-    ) {}
+    ) {
+    }
 
     public function __invoke(Builder $query, bool $descending, string $property): void
     {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Fields\Text;
 use Humweb\Table\Pipeline\ApplySorts;
-use Humweb\Table\Sorts\BasicSort;
 use Humweb\Table\Sorts\CallbackSort;
 use Humweb\Table\TableRequest;
 use Humweb\Table\Tests\Models\User;

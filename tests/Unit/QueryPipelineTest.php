@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 use Humweb\Table\Pipeline\ApplyDefaultSort;
 use Humweb\Table\Pipeline\ApplyEagerLoads;
-use Humweb\Table\Pipeline\ApplyGlobalSearch;
-use Humweb\Table\Pipeline\ApplySearch;
-use Humweb\Table\Pipeline\ApplySorts;
 use Humweb\Table\Pipeline\QueryPipeline;
 use Humweb\Table\Pipeline\QueryStage;
 use Humweb\Table\TableRequest;
@@ -20,8 +17,10 @@ it('processes stages in order', function () {
     $query = User::query();
     $order = [];
 
-    $stageA = new class($order) implements QueryStage {
-        public function __construct(private array &$order) {}
+    $stageA = new class ($order) implements QueryStage {
+        public function __construct(private array &$order)
+        {
+        }
 
         public function handle(Builder $query, TableRequest $request, Closure $next): Builder
         {
@@ -31,8 +30,10 @@ it('processes stages in order', function () {
         }
     };
 
-    $stageB = new class($order) implements QueryStage {
-        public function __construct(private array &$order) {}
+    $stageB = new class ($order) implements QueryStage {
+        public function __construct(private array &$order)
+        {
+        }
 
         public function handle(Builder $query, TableRequest $request, Closure $next): Builder
         {
@@ -42,7 +43,7 @@ it('processes stages in order', function () {
         }
     };
 
-    $pipeline = new QueryPipeline;
+    $pipeline = new QueryPipeline();
     $pipeline->through($stageA, $stageB);
     $pipeline->process($query, $request);
 
@@ -50,7 +51,7 @@ it('processes stages in order', function () {
 });
 
 it('can replace a stage by class name', function () {
-    $pipeline = new QueryPipeline;
+    $pipeline = new QueryPipeline();
     $pipeline->through(new ApplyDefaultSort('id'));
 
     $replacement = new ApplyDefaultSort('name');
@@ -62,7 +63,7 @@ it('can replace a stage by class name', function () {
 });
 
 it('can insert a stage before another', function () {
-    $pipeline = new QueryPipeline;
+    $pipeline = new QueryPipeline();
     $sort = new ApplyDefaultSort('id');
     $pipeline->through($sort);
 
@@ -75,7 +76,7 @@ it('can insert a stage before another', function () {
 });
 
 it('can insert a stage after another', function () {
-    $pipeline = new QueryPipeline;
+    $pipeline = new QueryPipeline();
     $sort = new ApplyDefaultSort('id');
     $pipeline->through($sort);
 
@@ -93,7 +94,7 @@ it('applies default sort when no sort param', function () {
     $request = new TableRequest(Request::createFromGlobals());
     $query = User::query();
 
-    $pipeline = new QueryPipeline;
+    $pipeline = new QueryPipeline();
     $pipeline->through(new ApplyDefaultSort('name'));
     $pipeline->process($query, $request);
 
@@ -107,7 +108,7 @@ it('skips default sort when sort param exists', function () {
     $request = new TableRequest($httpRequest);
     $query = User::query();
 
-    $pipeline = new QueryPipeline;
+    $pipeline = new QueryPipeline();
     $pipeline->through(new ApplyDefaultSort('name'));
     $pipeline->process($query, $request);
 

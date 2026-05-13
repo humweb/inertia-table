@@ -88,7 +88,7 @@ trait HasResourceQueries
      */
     protected function buildPipeline(): QueryPipeline
     {
-        $pipeline = new QueryPipeline;
+        $pipeline = new QueryPipeline();
 
         $globalSearchHandler = method_exists($this, 'globalFilter')
             ? fn ($query, $value) => $this->globalFilter($query, $value)
@@ -188,7 +188,7 @@ trait HasResourceQueries
         if ($field->collectionSortStrategy) {
             $allRecords = ($field->collectionSortStrategy)($allRecords, $descending, $attribute);
         } else {
-            $allRecords = (new BasicCollectionSort)($allRecords, $descending, $attribute);
+            $allRecords = (new BasicCollectionSort())($allRecords, $descending, $attribute);
         }
 
         $currentPage = $page ?? LengthAwarePaginator::resolveCurrentPage($pageName);

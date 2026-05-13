@@ -13,7 +13,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class ApplySorts implements QueryStage
 {
-    public function __construct(protected FieldCollection $fields) {}
+    public function __construct(protected FieldCollection $fields)
+    {
+    }
 
     public function handle(Builder|QueryBuilder $query, TableRequest $request, Closure $next): Builder|QueryBuilder
     {

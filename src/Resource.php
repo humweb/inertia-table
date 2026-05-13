@@ -12,7 +12,6 @@ use Humweb\Table\Contracts\FilterCollectionable;
 use Humweb\Table\Fields\FieldCollection;
 use Humweb\Table\Filters\FilterCollection;
 use Humweb\Table\Sorts\Sort;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 abstract class Resource
@@ -100,7 +99,7 @@ abstract class Resource
 
     public function filters(): FilterCollectionable
     {
-        return new FilterCollection;
+        return new FilterCollection();
     }
 
     /**

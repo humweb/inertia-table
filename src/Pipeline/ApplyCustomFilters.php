@@ -19,7 +19,8 @@ class ApplyCustomFilters implements QueryStage
     public function __construct(
         protected array $parameters,
         protected object $resource,
-    ) {}
+    ) {
+    }
 
     public function handle(Builder|QueryBuilder $query, TableRequest $request, Closure $next): Builder|QueryBuilder
     {

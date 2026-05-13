@@ -14,7 +14,9 @@ class ApplyEagerLoads implements QueryStage
     /**
      * @param  array<int, string>  $relations
      */
-    public function __construct(protected array $relations = []) {}
+    public function __construct(protected array $relations = [])
+    {
+    }
 
     public function handle(Builder|QueryBuilder $query, TableRequest $request, Closure $next): Builder|QueryBuilder
     {

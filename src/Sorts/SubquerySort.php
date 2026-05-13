@@ -12,7 +12,9 @@ class SubquerySort implements Sort
     /**
      * @param  Closure  $subqueryBuilder  Receives the parent Builder, returns a subquery Builder
      */
-    public function __construct(protected Closure $subqueryBuilder) {}
+    public function __construct(protected Closure $subqueryBuilder)
+    {
+    }
 
     public function __invoke(Builder $query, bool $descending, string $property): void
     {

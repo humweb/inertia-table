@@ -16,7 +16,8 @@ class ApplySearch implements QueryStage
     public function __construct(
         protected FieldCollection $fields,
         protected string $driver = 'pgsql',
-    ) {}
+    ) {
+    }
 
     public function handle(Builder|QueryBuilder $query, TableRequest $request, Closure $next): Builder|QueryBuilder
     {
