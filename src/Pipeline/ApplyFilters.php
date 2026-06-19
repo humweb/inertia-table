@@ -12,7 +12,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class ApplyFilters implements QueryStage
 {
-    public function __construct(protected FilterCollection $filters) {}
+    public function __construct(protected FilterCollection $filters)
+    {
+    }
 
     public function handle(Builder|QueryBuilder $query, TableRequest $request, Closure $next): Builder|QueryBuilder
     {

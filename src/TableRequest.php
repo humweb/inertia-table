@@ -11,7 +11,8 @@ class TableRequest
     public function __construct(
         protected Request $request,
         protected string $key = 'default',
-    ) {}
+    ) {
+    }
 
     public function getKey(): string
     {
