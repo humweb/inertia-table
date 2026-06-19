@@ -27,7 +27,7 @@ class InertiaTable
     ) {
         $this->columns = new FieldCollection;
         $this->filters = new FilterCollection;
-        $this->search = collect();
+        $this->search  = collect();
     }
 
     public function globalSearch(bool $bool): static
@@ -45,17 +45,17 @@ class InertiaTable
     public function buildTableProps(): array
     {
         $columns = $this->flagVisibility();
-        $search = $this->transformSearch();
+        $search  = $this->transformSearch();
         $filters = $this->transformFilters();
 
         $defaultPerPage = (int) config('inertia-table.pagination.default_per_page', 15);
 
         return [
-            'sort' => $this->tableRequest->getSortParam(),
-            'page' => $this->tableRequest->getPage(),
+            'sort'    => $this->tableRequest->getSortParam(),
+            'page'    => $this->tableRequest->getPage(),
             'perPage' => $this->tableRequest->getPerPage($defaultPerPage),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
@@ -72,17 +72,89 @@ class InertiaTable
         ];
 
         if ($this->records instanceof LengthAwarePaginator) {
-            $paginated = $this->records->toArray();
-            $result['records'] = $paginated['data'];
+            $paginated            = $this->records->toArray();
+            $result['records']    = $this->resolveRouteUrls($paginated['data']);
             $result['pagination'] = Arr::except($paginated, 'data');
         }
 
         return $result;
     }
 
+    /**
+     * Resolve per-row URLs for action/link/relation columns server-side so the
+     * frontend never needs to know route names. Resolved URLs are attached to
+     * each record under `__hrefs[attribute]` (link/relation) and
+     * `__actions[attribute]` (an array of {label, url, method, class}).
+     *
+     * @param  array<int, array<string, mixed>>  $records
+     * @return array<int, array<string, mixed>>
+     */
+    private function resolveRouteUrls(array $records): array
+    {
+        $routedColumns = $this->columns->filter(
+            fn ($column) => isset($column->meta['route']) || isset($column->meta['actions'])
+        );
+
+        if ($routedColumns->isEmpty()) {
+            return $records;
+        }
+
+        return array_map(function (array $record) use ($routedColumns) {
+            $hrefs   = [];
+            $actions = [];
+
+            foreach ($routedColumns as $column) {
+                if (isset($column->meta['actions'])) {
+                    $actions[$column->attribute] = array_map(fn (array $action) => [
+                        'label'  => $action['label'] ?? null,
+                        'url'    => $this->resolveRouteUrl($action['route'] ?? null, $action['params'] ?? [], $record),
+                        'method' => $action['method'] ?? 'get',
+                        'class'  => $action['class']  ?? null,
+                    ], $column->meta['actions']);
+                } elseif (isset($column->meta['route'])) {
+                    $hrefs[$column->attribute] = $this->resolveRouteUrl(
+                        $column->meta['route'],
+                        $column->meta['routeParams'] ?? [],
+                        $record
+                    );
+                }
+            }
+
+            if ($hrefs !== []) {
+                $record['__hrefs'] = $hrefs;
+            }
+
+            if ($actions !== []) {
+                $record['__actions'] = $actions;
+            }
+
+            return $record;
+        }, $records);
+    }
+
+    /**
+     * Resolve a single route name + record-keyed params to a URL, returning null
+     * when the route cannot be resolved (rather than throwing for one bad row).
+     *
+     * @param  array<int, string>  $paramKeys
+     * @param  array<string, mixed>  $record
+     */
+    private function resolveRouteUrl(?string $name, array $paramKeys, array $record): ?string
+    {
+        if ($name === null || $name === '') {
+            return null;
+        }
+
+        try {
+            return route($name, array_map(fn ($key) => $record[$key] ?? null, $paramKeys));
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     private function flagVisibility(): Collection
     {
-        $hidden = $this->tableRequest->getHiddenColumns();
+        $hidden  = $this->tableRequest->getHiddenColumns();
         $columns = $hidden !== '' ? explode(',', $hidden) : [];
 
         if (empty($columns)) {
@@ -142,9 +214,6 @@ class InertiaTable
         return $this;
     }
 
-    /**
-     * @param  string|array  $columns
-     */
     public function searchable(string|array $columns, ?string $label = null, mixed $value = null): static
     {
         if (is_array($columns)) {
@@ -153,9 +222,9 @@ class InertiaTable
             }
         } else {
             $this->search->put($columns, [
-                'key' => $columns,
-                'label' => $label,
-                'value' => $value,
+                'key'     => $columns,
+                'label'   => $label,
+                'value'   => $value,
                 'enabled' => ! is_null($value),
             ]);
         }

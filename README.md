@@ -39,7 +39,7 @@ class UserResource extends Resource
             ID::make('ID')->sortable(),
             Text::make('Name')->sortable()->searchable(),
             Text::make('Email')->sortable()->searchable(),
-            Badge::make('Status')->sortable()->meta([
+            Badge::make('Status')->sortable()->withMeta([
                 'map' => [
                     'active' => ['label' => 'Active', 'class' => 'badge-green'],
                     'inactive' => ['label' => 'Inactive', 'class' => 'badge-gray'],
@@ -244,7 +244,7 @@ Text::make('Name')
     ->visible(false)                      // Hidden by default
     ->visibility(true)                    // Allow toggling visibility
     ->nullable()                          // Mark as nullable
-    ->meta(['tooltip' => 'Full name'])    // Arbitrary metadata sent to frontend
+    ->withMeta(['tooltip' => 'Full name'])    // Arbitrary metadata sent to frontend
 ```
 
 ### Filters
