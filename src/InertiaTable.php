@@ -25,9 +25,9 @@ class InertiaTable
     public function __construct(
         public TableRequest $tableRequest,
     ) {
-        $this->columns = new FieldCollection;
-        $this->filters = new FilterCollection;
-        $this->search  = collect();
+        $this->columns = new FieldCollection();
+        $this->filters = new FilterCollection();
+        $this->search = collect();
     }
 
     public function globalSearch(bool $bool): static
@@ -45,17 +45,17 @@ class InertiaTable
     public function buildTableProps(): array
     {
         $columns = $this->flagVisibility();
-        $search  = $this->transformSearch();
+        $search = $this->transformSearch();
         $filters = $this->transformFilters();
 
         $defaultPerPage = (int) config('inertia-table.pagination.default_per_page', 15);
 
         return [
-            'sort'    => $this->tableRequest->getSortParam(),
-            'page'    => $this->tableRequest->getPage(),
+            'sort' => $this->tableRequest->getSortParam(),
+            'page' => $this->tableRequest->getPage(),
             'perPage' => $this->tableRequest->getPerPage($defaultPerPage),
             'columns' => $columns->isNotEmpty() ? $columns->all() : (object) [],
-            'search'  => $search->isNotEmpty() ? $search->all() : (object) [],
+            'search' => $search->isNotEmpty() ? $search->all() : (object) [],
             'filters' => $filters->isNotEmpty() ? $filters->all() : (object) [],
         ];
     }
@@ -72,8 +72,8 @@ class InertiaTable
         ];
 
         if ($this->records instanceof LengthAwarePaginator) {
-            $paginated            = $this->records->toArray();
-            $result['records']    = $this->resolveRouteUrls($paginated['data']);
+            $paginated = $this->records->toArray();
+            $result['records'] = $this->resolveRouteUrls($paginated['data']);
             $result['pagination'] = Arr::except($paginated, 'data');
         }
 
@@ -100,16 +100,16 @@ class InertiaTable
         }
 
         return array_map(function (array $record) use ($routedColumns) {
-            $hrefs   = [];
+            $hrefs = [];
             $actions = [];
 
             foreach ($routedColumns as $column) {
                 if (isset($column->meta['actions'])) {
                     $actions[$column->attribute] = array_map(fn (array $action) => [
-                        'label'  => $action['label'] ?? null,
-                        'url'    => $this->resolveRouteUrl($action['route'] ?? null, $action['params'] ?? [], $record),
+                        'label' => $action['label'] ?? null,
+                        'url' => $this->resolveRouteUrl($action['route'] ?? null, $action['params'] ?? [], $record),
                         'method' => $action['method'] ?? 'get',
-                        'class'  => $action['class']  ?? null,
+                        'class' => $action['class'] ?? null,
                     ], $column->meta['actions']);
                 } elseif (isset($column->meta['route'])) {
                     $hrefs[$column->attribute] = $this->resolveRouteUrl(
@@ -154,7 +154,7 @@ class InertiaTable
 
     private function flagVisibility(): Collection
     {
-        $hidden  = $this->tableRequest->getHiddenColumns();
+        $hidden = $this->tableRequest->getHiddenColumns();
         $columns = $hidden !== '' ? explode(',', $hidden) : [];
 
         if (empty($columns)) {
@@ -222,9 +222,9 @@ class InertiaTable
             }
         } else {
             $this->search->put($columns, [
-                'key'     => $columns,
-                'label'   => $label,
-                'value'   => $value,
+                'key' => $columns,
+                'label' => $label,
+                'value' => $value,
                 'enabled' => ! is_null($value),
             ]);
         }
