@@ -9,6 +9,7 @@ use Humweb\Table\Pipeline\QueryStage;
 use Humweb\Table\TableRequest;
 use Humweb\Table\Tests\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +23,7 @@ it('processes stages in order', function () {
         {
         }
 
-        public function handle(Builder $query, TableRequest $request, Closure $next): Builder
+        public function handle(Builder|QueryBuilder $query, TableRequest $request, Closure $next): Builder|QueryBuilder
         {
             $this->order[] = 'A';
 
@@ -35,7 +36,7 @@ it('processes stages in order', function () {
         {
         }
 
-        public function handle(Builder $query, TableRequest $request, Closure $next): Builder
+        public function handle(Builder|QueryBuilder $query, TableRequest $request, Closure $next): Builder|QueryBuilder
         {
             $this->order[] = 'B';
 
