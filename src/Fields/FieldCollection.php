@@ -46,7 +46,11 @@ class FieldCollection extends Collection implements FieldCollectionable
         }
 
         return $records->through(function ($record) use ($transformableFields) {
-            $record = $record->toArray();
+            // Rows may already be plain arrays when a resource/runtime
+            // transform ran first; only Eloquent models need converting.
+            $record = is_array($record)
+                ? $record
+                : (is_object($record) && method_exists($record, 'toArray') ? $record->toArray() : (array) $record);
 
             foreach ($transformableFields as $field) {
                 $value = Arr::get($record, $field->attribute);

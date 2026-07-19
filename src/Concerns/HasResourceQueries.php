@@ -64,13 +64,17 @@ trait HasResourceQueries
         }
 
         $data = $this->query->paginate($perPage, $columns, $pageName, $page)->withQueryString();
-        $data = $this->getFields()->applyTransform($data);
 
+        // Resource/runtime transforms run first so their closures receive the
+        // real Eloquent model (typed callbacks like fn (Game $g) => ... work).
+        // Field-level transforms then decorate the resulting rows.
         if ($this->runtimeTransform) {
             $data = $data->through($this->runtimeTransform);
         } elseif (method_exists($this, 'transform')) {
             $data = $data->through($this->transform());
         }
+
+        $data = $this->getFields()->applyTransform($data);
 
         return $data;
     }
@@ -159,10 +163,22 @@ trait HasResourceQueries
 
         $allRecords = $this->query->get($columns);
 
+        // Resource/runtime transform first so its closure receives the real
+        // Eloquent model; field-level transforms then decorate the rows.
+        if ($this->runtimeTransform) {
+            $allRecords = $allRecords->map($this->runtimeTransform);
+        } elseif (method_exists($this, 'transform')) {
+            $allRecords = $allRecords->map($this->transform());
+        }
+
+        $toRow = fn ($record) => is_array($record)
+            ? $record
+            : (is_object($record) && method_exists($record, 'toArray') ? $record->toArray() : (array) $record);
+
         $transformableFields = $this->getFields()->filter(fn ($f) => $f->hasTransform() || $f->hasCallableTransform());
         if ($transformableFields->isNotEmpty()) {
-            $allRecords = $allRecords->map(function ($record) use ($transformableFields) {
-                $record = $record->toArray();
+            $allRecords = $allRecords->map(function ($record) use ($transformableFields, $toRow) {
+                $record = $toRow($record);
                 foreach ($transformableFields as $f) {
                     $value = data_get($record, $f->attribute);
                     if ($f->hasTransform()) {
@@ -176,13 +192,7 @@ trait HasResourceQueries
                 return $record;
             });
         } else {
-            $allRecords = $allRecords->map(fn ($record) => $record->toArray());
-        }
-
-        if ($this->runtimeTransform) {
-            $allRecords = $allRecords->map($this->runtimeTransform);
-        } elseif (method_exists($this, 'transform')) {
-            $allRecords = $allRecords->map($this->transform());
+            $allRecords = $allRecords->map($toRow);
         }
 
         if ($field->collectionSortStrategy) {
