@@ -20,9 +20,9 @@ class FilterCollection extends Collection implements FilterCollectionable
      *
      * @return FilterCollection
      */
-    public static function make($items = []): FilterCollection
+    public static function make($items = [], ...$args): FilterCollection
     {
-        return new static($items);
+        return new static($items, ...$args);
     }
 
     public function apply(Request $request, $query): void
