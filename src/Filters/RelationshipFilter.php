@@ -36,11 +36,11 @@ class RelationshipFilter extends Filter
     public static function make(...$arguments): static
     {
         $relation = (string) ($arguments[0] ?? '');
-        $column   = (string) ($arguments[1] ?? 'id');
+        $column = (string) ($arguments[1] ?? 'id');
 
-        $instance           = new static($relation, $relation);
+        $instance = new static($relation, $relation);
         $instance->relation = $relation;
-        $instance->column   = $column;
+        $instance->column = $column;
         // Standardize with base Filter relation API
         if (method_exists($instance, 'relation')) {
             $instance->relation($relation, $column);
@@ -65,9 +65,9 @@ class RelationshipFilter extends Filter
     public function fromModel(string $modelClass, string $label = 'name', string $key = 'id', ?callable $queryMutator = null): static
     {
         // Store definition for lazy resolution during serialization only
-        $this->optionsModelClass   = $modelClass;
-        $this->optionsLabel        = $label;
-        $this->optionsKey          = $key;
+        $this->optionsModelClass = $modelClass;
+        $this->optionsLabel = $label;
+        $this->optionsKey = $key;
         $this->optionsQueryMutator = $queryMutator;
 
         return $this;

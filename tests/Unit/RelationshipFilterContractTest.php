@@ -21,7 +21,7 @@ it('loads without a signature or property conflict against Filter', function () 
 
 it('keeps make() variadic so it stays compatible with Makeable', function () {
     $parent = new ReflectionMethod(Filter::class, 'make');
-    $child  = new ReflectionMethod(RelationshipFilter::class, 'make');
+    $child = new ReflectionMethod(RelationshipFilter::class, 'make');
 
     expect($parent->isVariadic())->toBeTrue('Filter::make is expected to come from Makeable');
     expect($child->isVariadic())->toBeTrue('a narrower make() here is a fatal error, not a type error');
