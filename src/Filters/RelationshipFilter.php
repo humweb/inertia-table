@@ -9,23 +9,38 @@ class RelationshipFilter extends Filter
 {
     public string $component = 'relationship-filter';
 
-    public string $relation;
+    // $relation is declared on Filter as ?string; redeclaring it as a plain
+    // string here is a fatal property-type mismatch.
     public string $column = 'id';
 
     /**
      * Lazy options state
      */
     protected ?string $optionsModelClass = null;
+
     protected string $optionsLabel = 'name';
+
     protected string $optionsKey = 'id';
+
     /** @var callable|null */
     protected $optionsQueryMutator = null;
 
-    public static function make(string $relation, string $column = 'id'): static
+    /**
+     * Build a filter for a relation.
+     *
+     * Variadic to stay compatible with Makeable::make(...$arguments), which
+     * Filter inherits — a narrower signature here is a fatal error.
+     *
+     * @param  string  ...$arguments  $relation, then an optional $column (default 'id')
+     */
+    public static function make(...$arguments): static
     {
-        $instance = new static($relation, $relation);
+        $relation = (string) ($arguments[0] ?? '');
+        $column   = (string) ($arguments[1] ?? 'id');
+
+        $instance           = new static($relation, $relation);
         $instance->relation = $relation;
-        $instance->column = $column;
+        $instance->column   = $column;
         // Standardize with base Filter relation API
         if (method_exists($instance, 'relation')) {
             $instance->relation($relation, $column);
@@ -50,9 +65,9 @@ class RelationshipFilter extends Filter
     public function fromModel(string $modelClass, string $label = 'name', string $key = 'id', ?callable $queryMutator = null): static
     {
         // Store definition for lazy resolution during serialization only
-        $this->optionsModelClass = $modelClass;
-        $this->optionsLabel = $label;
-        $this->optionsKey = $key;
+        $this->optionsModelClass   = $modelClass;
+        $this->optionsLabel        = $label;
+        $this->optionsKey          = $key;
         $this->optionsQueryMutator = $queryMutator;
 
         return $this;
