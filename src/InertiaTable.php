@@ -84,7 +84,7 @@ class InertiaTable
      * Resolve per-row URLs for action/link/relation columns server-side so the
      * frontend never needs to know route names. Resolved URLs are attached to
      * each record under `__hrefs[attribute]` (link/relation) and
-     * `__actions[attribute]` (an array of {label, url, method, class}).
+     * `__actions[attribute]` (an array of {label, url, method, class, confirm}).
      *
      * @param  array<int, array<string, mixed>>  $records
      * @return array<int, array<string, mixed>>
@@ -110,6 +110,10 @@ class InertiaTable
                         'url' => $this->resolveRouteUrl($action['route'] ?? null, $action['params'] ?? [], $record),
                         'method' => $action['method'] ?? 'get',
                         'class' => $action['class'] ?? null,
+                        // Prompt text for an action that cannot be undone. The keys forwarded
+                        // here are a whitelist, so an action config may carry `confirm` and
+                        // still have it silently dropped unless it is named.
+                        'confirm' => $action['confirm'] ?? null,
                     ], $column->meta['actions']);
                 } elseif (isset($column->meta['route'])) {
                     $hrefs[$column->attribute] = $this->resolveRouteUrl(
