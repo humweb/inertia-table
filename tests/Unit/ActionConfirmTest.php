@@ -30,10 +30,10 @@ function tableWithActions(array $actions, array $row = ['id' => 7]): array
 
 it('forwards a confirmation prompt for an action that cannot be undone', function () {
     $resolved = tableWithActions([[
-        'label'   => 'Delete',
-        'route'   => 'things.destroy',
-        'params'  => ['id'],
-        'method'  => 'delete',
+        'label' => 'Delete',
+        'route' => 'things.destroy',
+        'params' => ['id'],
+        'method' => 'delete',
         'confirm' => 'Delete this thing?',
     ]]);
 
@@ -45,8 +45,8 @@ it('forwards a confirmation prompt for an action that cannot be undone', functio
 /** Absent means "do not ask", and must not become the string "null" or an empty prompt. */
 it('sends a null confirmation when the action does not ask', function () {
     $resolved = tableWithActions([[
-        'label'  => 'View',
-        'route'  => 'things.show',
+        'label' => 'View',
+        'route' => 'things.show',
         'params' => ['id'],
     ]]);
 
@@ -57,10 +57,10 @@ it('sends a null confirmation when the action does not ask', function () {
 /** The existing keys keep their shape; this is an addition, not a rewrite. */
 it('still forwards label, url, method and class', function () {
     $resolved = tableWithActions([[
-        'label'  => 'View',
-        'route'  => 'things.show',
+        'label' => 'View',
+        'route' => 'things.show',
         'params' => ['id'],
-        'class'  => 'bt bt-white',
+        'class' => 'bt bt-white',
     ]]);
 
     expect(array_keys($resolved[0]))->toBe(['label', 'url', 'method', 'class', 'confirm'])
