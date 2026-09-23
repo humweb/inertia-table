@@ -19,8 +19,6 @@ class InertiaTableServiceProvider extends ServiceProvider
             ], 'inertia-table-config');
         }
 
-        $request = $this->app['request'];
-
         /**
          * Register a table on the Inertia response.
          *
@@ -30,8 +28,14 @@ class InertiaTableServiceProvider extends ServiceProvider
          *
          * Single-table shorthand (key defaults to 'default'):
          *   ->table(fn ($table) => ...)
+         *
+         * The request is resolved per call, not captured at boot: the container
+         * rebinds it for every request (tests, Octane), and a boot-time copy
+         * silently ignores that request's sort, search, filters and page.
          */
-        Response::macro('table', function (string|callable $keyOrHandler, ?callable $handler = null) use ($request) {
+        $app = $this->app;
+
+        Response::macro('table', function (string|callable $keyOrHandler, ?callable $handler = null) use ($app) {
             /** @var Response $this */
             if (is_callable($keyOrHandler)) {
                 $key = 'default';
@@ -40,7 +44,7 @@ class InertiaTableServiceProvider extends ServiceProvider
                 $key = $keyOrHandler;
             }
 
-            $tableRequest = new TableRequest($request, $key);
+            $tableRequest = new TableRequest($app['request'], $key);
             $tableBuilder = new InertiaTable($tableRequest);
 
             $propKey = $key === 'default' ? 'table' : "tables.{$key}";
